@@ -1,19 +1,16 @@
 # Fetching the latest node image on alpine linux
-FROM node:alpine
-
-# Declaring env
-ENV NODE_ENV development
-
-# Installing dependencies
-COPY ./front-end /var/www/react
+FROM node:18-alpine
 
 # Setting up the work directory
-WORKDIR /var/www/react
+WORKDIR /var/www/front
 
+# Installing files
+COPY ./front/public/ .
+COPY ./front/src/ .
+COPY ./front/package.json .
+
+# Installing npm modules
 RUN npm install
-
-# Copying all the files in our project
-COPY ./front-end/ .
 
 # Starting our application
 CMD ["npm","start"]

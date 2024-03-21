@@ -1,50 +1,51 @@
 version: '3.8'
 
 services:
-  mariadb:
-    image: mariadb:latest
+  mysql:
+    image: mysql:8.3
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: password
       MYSQL_USER: user
       MYSQL_PASSWORD: password
       MYSQL_DATABASE: tavern-board
     ports:
       - "3306:3306"
     networks:
-      - mariadb
+      - net
     volumes:
-      - ./docker/mariadb:/var/lib/mysql
+      - ./docker/mysql:/var/lib/mysql
 
   php:
     image: php:8.3-fpm
     ports:
       - '9000:9000'
+    networks:
+      - net
     volumes:
-      - ./back-end:/var/www/symfony
-    depends_on:
-      - mariadb
+      - ./symfony:/var/www/symfony
       
   nginx:
     build:
       context: .
       dockerfile: docker/nginx/Dockerfile
     ports:
-      - "8000:80"
+      - "80:80"
+    networks:
+      - net
     volumes:
-      - ./back-end:/var/www/symfony
-    depends_on:
-      - php
-      - mariadb
+      - ./symfony:/var/www/symfony
 
   node:
     build:
       context: .
       dockerfile: docker/node/Dockerfile
     volumes:
-      - ./back-end:/var/www/react
+      - ./front:/var/www/front
     ports:
       - 3000:3000
+    networks:
+      - net
       
 networks:
-  mariadb:
-  nginx:
+  net:
+    driver: bridge

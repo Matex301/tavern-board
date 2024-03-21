@@ -1,1 +1,1 @@
-# tavern-board
+# Tavern Board
