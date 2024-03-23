@@ -25,4 +25,6 @@ RUN docker-php-ext-install \
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+#COPY ./docker/php/php.ini /usr/local/etc/php/
+
 WORKDIR /var/www/symfony

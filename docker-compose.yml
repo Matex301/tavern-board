@@ -17,8 +17,11 @@ services:
 
   php:
     image: php:8.3-fpm
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
     ports:
-      - '9000:9000'
+      - "9000:9000"
     networks:
       - net
     volumes:
@@ -34,6 +37,8 @@ services:
       - net
     volumes:
       - ./symfony:/var/www/symfony
+    depends_on:
+      - php
 
   node:
     build:
@@ -42,7 +47,18 @@ services:
     volumes:
       - ./front:/var/www/front
     ports:
-      - 3000:3000
+      - "3000:3000"
+    networks:
+      - net
+
+  mailer:
+    image: axllent/mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
     networks:
       - net
       
