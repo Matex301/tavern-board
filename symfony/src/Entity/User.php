@@ -3,12 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -19,9 +21,8 @@ use Symfony\Component\Uid\Uuid;
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    // add UuidType::NAME as the third argument to tell Doctrine that this is a UUID
     #[ORM\Id]
-    #[ORM\Column(type: UuidType::NAME)]
+    #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     #[Assert\Uuid]
@@ -36,7 +37,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Email]
     private ?string $email = null;
 
-    #[ORM\Column(type: 'datetime_immutable')]
+    #[ORM\Column(type: 'datetime_immutable', nullable: false)]
     private ?\DateTimeImmutable $created_at = null;
 
     /**
@@ -53,6 +54,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'boolean', nullable: false)]
     private $isVerified = false;
+
+    #[ORM\OneToMany(targetEntity: Quest::class, mappedBy: 'creator')]
+    private Collection $quests;
+
+    #[ORM\ManyToMany(targetEntity: Quest::class, inversedBy: 'players')]
+    private Collection $joined_quests;
+
+    public function __construct()
+    {
+        $this->quests = new ArrayCollection();
+        $this->joined_quests = new ArrayCollection();
+    }
 
     public function getId(): ?Uuid
     {
@@ -161,5 +174,59 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setCreatedAt(): void
     {
         $this->created_at = new \DateTimeImmutable();
+    }
+
+    /**
+     * @return Collection<Uuid, Quest>
+     */
+    public function getQuests(): Collection
+    {
+        return $this->quests;
+    }
+
+    public function addQuest(Quest $quest): static
+    {
+        if (!$this->quests->contains($quest)) {
+            $this->quests->add($quest);
+            $quest->setCreator($this);
+        }
+
+        return $this;
+    }
+
+    public function removeQuest(Quest $quest): static
+    {
+        if ($this->quests->removeElement($quest)) {
+            // set the owning side to null (unless already changed)
+            if ($quest->getCreator() === $this) {
+                $quest->setCreator(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<Uuid, Quest>
+     */
+    public function getJoinedQuests(): Collection
+    {
+        return $this->joined_quests;
+    }
+
+    public function addJoinedQuest(Quest $joinedQuest): static
+    {
+        if (!$this->joined_quests->contains($joinedQuest)) {
+            $this->joined_quests->add($joinedQuest);
+        }
+
+        return $this;
+    }
+
+    public function removeJoinedQuest(Quest $joinedQuest): static
+    {
+        $this->joined_quests->removeElement($joinedQuest);
+
+        return $this;
     }
 }
