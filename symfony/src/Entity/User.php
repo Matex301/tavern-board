@@ -10,6 +10,7 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Uid\Uuid;
 
@@ -101,6 +102,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      *
      * @see UserInterface
      */
+    #[Ignore]
     public function getUserIdentifier(): string
     {
         return (string) $this->username;
@@ -132,6 +134,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @see PasswordAuthenticatedUserInterface
      */
+    #[Ignore]
     public function getPassword(): string
     {
         return $this->password;

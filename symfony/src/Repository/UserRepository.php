@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -36,6 +37,27 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user->setPassword($newHashedPassword);
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
+    }
+
+    public function findAllPagination($page = 1, $per = 50): array
+    {
+        $query = $this->createQueryBuilder('u')
+            ->orderBy('u.id', 'ASC')
+            ->getQuery();
+        $paginator = new Paginator($query);
+        $paginator->getQuery()
+            ->setFirstResult($per * ($page - 1))
+            ->setMaxResults($per);
+
+        $info = [
+            'max_items' => $paginator->count(),
+            'min_page' => 1,
+            'max_page' => ceil($paginator->count() / $per),
+            'current_page' => $page,
+            'per_page' => $per
+        ];
+
+        return ['_info' => $info, '_data' => $paginator];
     }
 
 //    /**

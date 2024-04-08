@@ -37,7 +37,7 @@ class RegistrationController extends AbstractController
             $errorsString = (string) $errors;
             return $this->json([
                 'message' => $errorsString,
-            ], JsonResponse::HTTP_CONFLICT);
+            ], Response::HTTP_CONFLICT);
         }
 
         // encode the plain password
@@ -64,7 +64,7 @@ class RegistrationController extends AbstractController
 
         return $this->json([
             'message' => 'Registration accepted',
-        ], JsonResponse::HTTP_ACCEPTED);
+        ], Response::HTTP_ACCEPTED);
     }
 
     #[Route('/api/verify/email', name: 'api_verify_email')]
