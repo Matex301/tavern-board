@@ -93,7 +93,7 @@ class Game
     }
 
     /**
-     * @return Collection<int, Quest>
+     * @return Collection<Uuid, Quest>
      */
     public function getQuests(): Collection
     {

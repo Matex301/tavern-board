@@ -112,6 +112,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @see UserInterface
      * @return list<string>
      */
+    #[Ignore]
     public function getRoles(): array
     {
         $roles = $this->roles;

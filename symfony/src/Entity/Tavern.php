@@ -7,6 +7,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Serializer\Attribute\Ignore;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: TavernRepository::class)]
@@ -29,6 +31,9 @@ class Tavern
 
     #[ORM\OneToMany(targetEntity: Quest::class, mappedBy: 'tavern')]
     private Collection $quests;
+
+    #[ORM\Embedded(class: Address::class)]
+    private Address $address;
 
     public function __construct()
     {
@@ -77,7 +82,7 @@ class Tavern
     }
 
     /**
-     * @return Collection<int, Quest>
+     * @return Collection<Uuid, Quest>
      */
     public function getQuests(): Collection
     {
@@ -102,6 +107,25 @@ class Tavern
                 $quest->setTavern(null);
             }
         }
+
+        return $this;
+    }
+
+    #[Ignore]
+    public function getAddress(): ?Address
+    {
+        return $this->address;
+    }
+
+    #[SerializedName('address')]
+    public function getAddressSerializer(): ?string
+    {
+        return (string)$this->address;
+    }
+
+    public function setAddress(Address $address): static
+    {
+        $this->address = $address;
 
         return $this;
     }

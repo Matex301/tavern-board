@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Game;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -19,6 +20,27 @@ class GameRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Game::class);
+    }
+
+    public function findAllPagination($page = 1, $per = 50): array
+    {
+        $query = $this->createQueryBuilder('g')
+            ->orderBy('g.id', 'ASC')
+            ->getQuery();
+        $paginator = new Paginator($query);
+        $paginator->getQuery()
+            ->setFirstResult($per * ($page - 1))
+            ->setMaxResults($per);
+
+        $info = [
+            'max_items' => $paginator->count(),
+            'min_page' => 1,
+            'max_page' => ceil($paginator->count() / $per),
+            'current_page' => $page,
+            'per_page' => $per
+        ];
+
+        return ['_info' => $info, '_data' => $paginator];
     }
 
 //    /**
