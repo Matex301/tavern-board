@@ -10,6 +10,7 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TavernRepository::class)]
 class Tavern
@@ -21,6 +22,8 @@ class Tavern
     private ?Uuid $id = null;
 
     #[ORM\Column(length: 255, nullable: false)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 6, max: 255)]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -84,6 +87,7 @@ class Tavern
     /**
      * @return Collection<Uuid, Quest>
      */
+    #[Ignore]
     public function getQuests(): Collection
     {
         return $this->quests;

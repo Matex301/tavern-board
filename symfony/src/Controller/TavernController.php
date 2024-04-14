@@ -2,13 +2,18 @@
 
 namespace App\Controller;
 
+use App\Entity\Address;
+use App\Entity\Tavern;
 use App\Repository\TavernRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class TavernController extends AbstractController
 {
@@ -24,24 +29,40 @@ class TavernController extends AbstractController
     }
 
     #[Route('/api/taverns/{id}', name: 'api_taverns_id', methods: ['GET'])]
-    public function user(TavernRepository $tavernRepository, String $id) : JsonResponse
+    public function user(TavernRepository $tavernRepository, Tavern $tavern) : JsonResponse
     {
-        if(!Uuid::isValid($id)) {
+        return $this->json([
+            $tavern,
+        ], Response::HTTP_OK);
+    }
+
+    #[Route('/api/taverns', name: 'api_taverns_create', methods: ['POST'])]
+    public function create(#[CurrentUser] $user, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator) : JsonResponse
+    {
+        $tavern = new Tavern();
+
+        $tavern->setName($request->getPayload()->getString('name'));
+        $tavern->setWebsite($request->getPayload()->getString('website'));
+        $tavern->setPhone($request->getPayload()->getString('phone'));
+        $tavern->setAddress(new Address(
+            $request->getPayload()->getString('country'),
+            $request->getPayload()->getString('city'),
+            $request->getPayload()->getString('street')
+        ));
+
+        $errors = $validator->validate($tavern);
+        if (count($errors) > 0) {
+            $errorsString = (string) $errors;
             return $this->json([
-                'message' => 'Invalid uuid',
+                'message' => $errorsString,
             ], Response::HTTP_CONFLICT);
         }
 
-        $user = $tavernRepository->find($id);
-
-        if(!$user) {
-            return $this->json([
-                'message' => 'Tavern not found',
-            ], Response::HTTP_NOT_FOUND);
-        }
+        $entityManager->persist($tavern);
+        $entityManager->flush();
 
         return $this->json([
-            $user,
-        ], Response::HTTP_OK);
+            'message' => 'Creation accepted.',
+        ], Response::HTTP_ACCEPTED);
     }
 }

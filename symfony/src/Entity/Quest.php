@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -23,32 +24,34 @@ class Quest
     private ?Uuid $id = null;
 
     #[ORM\Column(length: 255, nullable: false)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 6, max: 255)]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $image_url = null;
+    private ?string $imageUrl = null;
 
-    #[ORM\ManyToOne(inversedBy: 'created_quests')]
+    #[ORM\ManyToOne(inversedBy: 'createdQuests')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotBlank]
     private ?User $creator = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $current_players = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?int $max_players = null;
+    private ?int $maxPlayers = null;
 
     #[ORM\Column(nullable: false)]
-    private ?\DateTimeImmutable $created_at = null;
+    private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: false)]
-    private ?\DateTimeImmutable $start_at = null;
+    //#[Assert\DateTime]
+    private ?\DateTimeImmutable $startAt = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $end_at = null;
+    //#[Assert\DateTime]
+    private ?\DateTimeImmutable $endAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'quests')]
     #[ORM\JoinColumn(nullable: false)]
@@ -58,7 +61,7 @@ class Quest
     #[ORM\JoinColumn(nullable: false)]
     private ?Tavern $tavern = null;
 
-    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'joined_quests')]
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'joinedQuests')]
     private Collection $players;
 
     public function __construct()
@@ -97,16 +100,17 @@ class Quest
 
     public function getImageUrl(): ?string
     {
-        return $this->image_url;
+        return $this->imageUrl;
     }
 
-    public function setImageUrl(string $image_url): static
+    public function setImageUrl(string $imageUrl): static
     {
-        $this->image_url = $image_url;
+        $this->imageUrl = $imageUrl;
 
         return $this;
     }
 
+    #[Ignore]
     public function getCreator(): ?User
     {
         return $this->creator;
@@ -121,63 +125,57 @@ class Quest
 
     public function getCurrentPlayers(): ?int
     {
-        return $this->current_players;
-    }
-
-    public function setCurrentPlayers(?int $current_players): static
-    {
-        $this->current_players = $current_players;
-
-        return $this;
+        return $this->players->count();
     }
 
     public function getMaxPlayers(): ?int
     {
-        return $this->max_players;
+        return $this->maxPlayers;
     }
 
-    public function setMaxPlayers(?int $max_players): static
+    public function setMaxPlayers(?int $maxPlayers): static
     {
-        $this->max_players = $max_players;
+        $this->maxPlayers = $maxPlayers;
 
         return $this;
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     #[ORM\PrePersist]
     public function setCreatedAt(): void
     {
-        $this->created_at = new \DateTimeImmutable();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getStartAt(): ?\DateTimeImmutable
     {
-        return $this->start_at;
+        return $this->startAt;
     }
 
-    public function setStartAt(\DateTimeImmutable $start_at): static
+    public function setStartAt(\DateTimeImmutable $startAt): static
     {
-        $this->start_at = $start_at;
+        $this->startAt = $startAt;
 
         return $this;
     }
 
     public function getEndAt(): ?\DateTimeImmutable
     {
-        return $this->end_at;
+        return $this->endAt;
     }
 
-    public function setEndAt(?\DateTimeImmutable $end_at): static
+    public function setEndAt(?\DateTimeImmutable $endAt): static
     {
-        $this->end_at = $end_at;
+        $this->endAt = $endAt;
 
         return $this;
     }
 
+    #[Ignore]
     public function getGame(): ?Game
     {
         return $this->game;
@@ -190,6 +188,7 @@ class Quest
         return $this;
     }
 
+    #[Ignore]
     public function getTavern(): ?Tavern
     {
         return $this->tavern;
@@ -205,6 +204,7 @@ class Quest
     /**
      * @return Collection<Uuid, User>
      */
+    #[Ignore]
     public function getPlayers(): Collection
     {
         return $this->players;

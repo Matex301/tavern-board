@@ -22,12 +22,12 @@ class QuestRepository extends ServiceEntityRepository
         parent::__construct($registry, Quest::class);
     }
 
-    public function findAllPagination($page = 1, $date = new \DateTimeImmutable(), $per = 50): array
+    public function findAllPagination($page, $date = new \DateTimeImmutable(), $per = 50): array
     {
         $query = $this->createQueryBuilder('q')
-            ->andWhere('q.start_at >= :date')
+            ->andWhere('q.startAt >= :date')
             ->setParameter('date', $date)
-            ->orderBy('q.start_at', 'ASC')
+            ->orderBy('q.startAt', 'ASC')
             ->getQuery();
 
         $paginator = new Paginator($query);
@@ -42,6 +42,57 @@ class QuestRepository extends ServiceEntityRepository
             'current_page' => $page,
             'per_page' => $per,
             'begin_date' => $date
+        ];
+
+        return ['_info' => $info, '_data' => $paginator];
+    }
+
+    public function findByCreatorPagination($page, $id, $per = 50): array
+    {
+        $query = $this->createQueryBuilder('q')
+            ->andWhere('q.creator = :id')
+            ->setParameter('id', $id, 'uuid')
+            ->orderBy('q.startAt', 'DESC')
+            ->getQuery();
+
+        $paginator = new Paginator($query);
+        $paginator->getQuery()
+            ->setFirstResult($per * ($page - 1))
+            ->setMaxResults($per);
+
+        $info = [
+            'max_items' => $paginator->count(),
+            'min_page' => 1,
+            'max_page' => ceil($paginator->count() / $per),
+            'current_page' => $page,
+            'per_page' => $per,
+            'user' => $id
+        ];
+
+        return ['_info' => $info, '_data' => $paginator];
+    }
+
+    public function findByJoinedPagination($page, $id, $per = 50): array
+    {
+        $query = $this->createQueryBuilder('q')
+            ->select('q')
+            ->innerJoin('q.players', 'u', 'WITH', 'u.id = :id')
+            ->setParameter('id', $id, 'uuid')
+            ->orderBy('q.startAt', 'DESC')
+            ->getQuery();
+
+        $paginator = new Paginator($query);
+        $paginator->getQuery()
+            ->setFirstResult($per * ($page - 1))
+            ->setMaxResults($per);
+
+        $info = [
+            'max_items' => $paginator->count(),
+            'min_page' => 1,
+            'max_page' => ceil($paginator->count() / $per),
+            'current_page' => $page,
+            'per_page' => $per,
+            'user' => $id
         ];
 
         return ['_info' => $info, '_data' => $paginator];

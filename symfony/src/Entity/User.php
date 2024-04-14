@@ -13,6 +13,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -31,15 +32,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column( type: 'string', length: 180, nullable: false)]
     #[Assert\NotBlank]
+    #[Assert\Length(min: 6, max: 180)]
     private ?string $username = null;
 
     #[ORM\Column( type: 'string', length: 320, nullable: false)]
-    #[Assert\NotBlank()]
+    #[Assert\NotBlank]
     #[Assert\Email]
     private ?string $email = null;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: false)]
-    private ?\DateTimeImmutable $created_at = null;
+    private ?\DateTimeImmutable $createdAt = null;
 
     /**
      * @var list<string> The user roles
@@ -57,15 +59,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $isVerified = false;
 
     #[ORM\OneToMany(targetEntity: Quest::class, mappedBy: 'creator')]
-    private Collection $quests;
+    private Collection $createdQuests;
 
     #[ORM\ManyToMany(targetEntity: Quest::class, inversedBy: 'players')]
-    private Collection $joined_quests;
+    private Collection $joinedQuests;
 
     public function __construct()
     {
-        $this->quests = new ArrayCollection();
-        $this->joined_quests = new ArrayCollection();
+        $this->createdQuests = new ArrayCollection();
+        $this->joinedQuests = new ArrayCollection();
     }
 
     public function getId(): ?Uuid
@@ -171,36 +173,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getCreatedAt(): ?\DateTimeImmutable
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     #[ORM\PrePersist]
     public function setCreatedAt(): void
     {
-        $this->created_at = new \DateTimeImmutable();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     /**
      * @return Collection<Uuid, Quest>
      */
-    public function getQuests(): Collection
+    #[Ignore]
+    public function getCreatedQuests(): Collection
     {
-        return $this->quests;
+        return $this->createdQuests;
     }
 
-    public function addQuest(Quest $quest): static
+    public function addCreatedQuest(Quest $quest): static
     {
-        if (!$this->quests->contains($quest)) {
-            $this->quests->add($quest);
+        if (!$this->createdQuests->contains($quest)) {
+            $this->createdQuests->add($quest);
             $quest->setCreator($this);
         }
 
         return $this;
     }
 
-    public function removeQuest(Quest $quest): static
+    public function removeCreatedQuest(Quest $quest): static
     {
-        if ($this->quests->removeElement($quest)) {
+        if ($this->createdQuests->removeElement($quest)) {
             // set the owning side to null (unless already changed)
             if ($quest->getCreator() === $this) {
                 $quest->setCreator(null);
@@ -213,15 +216,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @return Collection<Uuid, Quest>
      */
+    #[Ignore]
     public function getJoinedQuests(): Collection
     {
-        return $this->joined_quests;
+        return $this->joinedQuests;
     }
 
     public function addJoinedQuest(Quest $joinedQuest): static
     {
-        if (!$this->joined_quests->contains($joinedQuest)) {
-            $this->joined_quests->add($joinedQuest);
+        if (!$this->joinedQuests->contains($joinedQuest)) {
+            $this->joinedQuests->add($joinedQuest);
         }
 
         return $this;
@@ -229,7 +233,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeJoinedQuest(Quest $joinedQuest): static
     {
-        $this->joined_quests->removeElement($joinedQuest);
+        $this->joinedQuests->removeElement($joinedQuest);
 
         return $this;
     }

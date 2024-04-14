@@ -8,7 +8,9 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: GameRepository::class)]
 class Game
@@ -19,17 +21,22 @@ class Game
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
     private ?Uuid $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: false)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 6, max: 255)]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $min_players = null;
+    #[Assert\GreaterThan(0)]
+    private ?int $minPlayers = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $max_player = null;
+    #[Assert\GreaterThan(0)]
+    #[Assert\GreaterThan(propertyPath: 'minPlayers')]
+    private ?int $maxPlayer = null;
 
     #[ORM\OneToMany(targetEntity: Quest::class, mappedBy: 'game')]
     private Collection $quests;
@@ -70,24 +77,24 @@ class Game
 
     public function getMinPlayers(): ?int
     {
-        return $this->min_players;
+        return $this->minPlayers;
     }
 
-    public function setMinPlayers(?int $min_players): static
+    public function setMinPlayers(?int $minPlayers): static
     {
-        $this->min_players = $min_players;
+        $this->minPlayers = $minPlayers;
 
         return $this;
     }
 
     public function getMaxPlayer(): ?int
     {
-        return $this->max_player;
+        return $this->maxPlayer;
     }
 
-    public function setMaxPlayer(?int $max_player): static
+    public function setMaxPlayer(?int $maxPlayer): static
     {
-        $this->max_player = $max_player;
+        $this->maxPlayer = $maxPlayer;
 
         return $this;
     }
@@ -95,6 +102,7 @@ class Game
     /**
      * @return Collection<Uuid, Quest>
      */
+    #[Ignore]
     public function getQuests(): Collection
     {
         return $this->quests;
