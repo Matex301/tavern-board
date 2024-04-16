@@ -5,12 +5,13 @@ FROM node:18-alpine
 WORKDIR /var/www/front
 
 # Installing files
-COPY ./front/public/ .
-COPY ./front/src/ .
-COPY ./front/package.json .
+#COPY ./front/public/ .
+#COPY ./front/src/ .
+#COPY ./front/package.json .
+COPY ./front/ .
 
 # Installing npm modules
 RUN npm install
 
 # Starting our application
-CMD ["npm","start"]
+CMD ["npm","run", "dev"]

@@ -58,6 +58,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean', nullable: false)]
     private $isVerified = false;
 
+    #[ORM\Column(type: 'boolean', nullable: false)]
+    private $isBanned = false;
+
     #[ORM\OneToMany(targetEntity: Quest::class, mappedBy: 'creator')]
     private Collection $createdQuests;
 
@@ -167,6 +170,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsVerified(bool $isVerified): static
     {
         $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    public function isBanned(): bool
+    {
+        return $this->isBanned;
+    }
+
+    public function setIsBanned(bool $isBanned): static
+    {
+        $this->isBanned = $isBanned;
 
         return $this;
     }
