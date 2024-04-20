@@ -2,16 +2,96 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use App\Controller\QuestLeaveController;
 use App\Repository\QuestRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
-use Symfony\Component\Serializer\Attribute\Ignore;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\State\QuestRegistrationProcessor;
+use OpenApi\Attributes as OA;
+use ApiPlatform\OpenApi\Model;
+use App\Controller\QuestJoinController;
 
+//TODO Allow admin role to add quest and join them on behalf of others
+
+#[ApiResource(
+    operations: [
+        new GetCollection(),
+        new Post(security: "is_granted('ROLE_USER')", validationContext: ['groups' => ['quest:create']], processor: QuestRegistrationProcessor::class),
+        new Get(),
+        new Get(uriTemplate: "/quests/{id}/players", normalizationContext: ['groups' => ['quest:players']], security: "is_granted('ROLE_ADMIN') or (object.creator == user)"),
+        new Patch(security: "is_granted('ROLE_ADMIN') or (object.creator == user)"),
+        new Delete(security: "is_granted('ROLE_ADMIN') or (object.creator == user)"),
+        new Post(
+            uriTemplate: "/quests/{id}/participation",
+            controller: QuestJoinController::class,
+            openapi: new Model\Operation(
+                responses: [
+                    '201' => [
+                        'schema' => [],
+                        'example' => [],
+                        'description' => "User added as a participant"
+                    ]
+                ],
+                summary: "Add User as participant to the Quest",
+                description: "The logged user is added as participant to the Quest. The owner of the Quest resource can not be added.",
+                requestBody: new Model\RequestBody(
+                    content: new \ArrayObject([
+                        'application/json' => [
+                            'schema' => [],
+                            'example' => []
+                        ]
+                    ])
+                )
+
+            ),
+            security: "is_granted('ROLE_USER')",
+        ),
+        new Delete(
+            uriTemplate: "/quests/{id}/participation",
+            controller: QuestLeaveController::class,
+            openapi: new Model\Operation(
+                responses: [
+                    '201' => [
+                        'schema' => [],
+                        'example' => [],
+                        'description' => "User removed or was never a participant"
+                    ]
+                ],
+                summary: "Remove User as participant to the Quest",
+                description: "The logged user is removed as participant from the Quest. The same response is send if user is removed or never was a participant of the Quest.",
+                requestBody: new Model\RequestBody(
+                    content: new \ArrayObject([
+                        'application/json' => [
+                            'schema' => [],
+                            'example' => []
+                        ]
+                    ])
+                )
+
+            ),
+            security: "is_granted('ROLE_USER')",
+        )
+    ],
+    normalizationContext: ['groups' => ['quest:read']],
+    denormalizationContext: ['groups' => ['quest:create', 'quest:update']],
+    order: ['startAt' => 'ASC']
+)]
 #[ORM\Entity(repositoryClass: QuestRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 class Quest
@@ -20,48 +100,67 @@ class Quest
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    #[Assert\Uuid]
+    #[Groups(['quest:read'])]
     private ?Uuid $id = null;
 
     #[ORM\Column(length: 255, nullable: false)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 6, max: 255)]
+    #[Groups(['quest:read', 'quest:create', 'quest:update'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['quest:read', 'quest:create', 'quest:update'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $imageUrl = null;
+    #[Groups(['quest:read', 'quest:create', 'quest:update'])]
+    private ?string $image = null;
 
     #[ORM\ManyToOne(inversedBy: 'createdQuests')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotBlank]
+    #[Groups(['quest:read'])]
+    #[ApiProperty(openapiContext: ['example' => '/api/users/018ed8dc-6a11-7abd-b9e4-43718ef2dfb0'])]
     private ?User $creator = null;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['quest:read', 'quest:create', 'quest:update'])]
     private ?int $maxPlayers = null;
+
+    #[Groups(['quest:read'])]
+    private ?int $currentPlayers = null;
 
     #[ORM\Column(nullable: false)]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: false)]
-    //#[Assert\DateTime]
+    #[Assert\DateTime, Assert\NotBlank]
+    #[Groups(['quest:read', 'quest:create', 'quest:update'])]
+    #[ApiFilter(DateFilter::class)]
+    #[ApiFilter(OrderFilter::class)]
     private ?\DateTimeImmutable $startAt = null;
 
     #[ORM\Column(nullable: true)]
-    //#[Assert\DateTime]
+    #[Assert\DateTime]
+    #[Groups(['quest:read', 'quest:create', 'quest:update'])]
     private ?\DateTimeImmutable $endAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'quests')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotBlank]
+    #[Groups(['quest:read', 'quest:create'])]
+    #[ApiProperty(openapiContext: ['example' => '/api/games/018ed86e-46ed-75a3-90ec-5c62c045cc20'])]
     private ?Game $game = null;
 
     #[ORM\ManyToOne(inversedBy: 'quests')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotBlank]
+    #[Groups(['quest:read', 'quest:create'])]
+    #[ApiProperty(openapiContext: ['example' => '/api/taverns/018ed86d-e18d-7552-9aeb-5ec34042a5d2'])]
     private ?Tavern $tavern = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'joinedQuests')]
+    #[Groups(['quest:players'])]
     private Collection $players;
 
     public function __construct()
@@ -98,19 +197,18 @@ class Quest
         return $this;
     }
 
-    public function getImageUrl(): ?string
+    public function getImage(): ?string
     {
-        return $this->imageUrl;
+        return $this->image;
     }
 
-    public function setImageUrl(string $imageUrl): static
+    public function setImage(string $imageUrl): static
     {
-        $this->imageUrl = $imageUrl;
+        $this->image = $imageUrl;
 
         return $this;
     }
 
-    #[Ignore]
     public function getCreator(): ?User
     {
         return $this->creator;
@@ -175,7 +273,6 @@ class Quest
         return $this;
     }
 
-    #[Ignore]
     public function getGame(): ?Game
     {
         return $this->game;
@@ -188,7 +285,6 @@ class Quest
         return $this;
     }
 
-    #[Ignore]
     public function getTavern(): ?Tavern
     {
         return $this->tavern;
@@ -202,12 +298,11 @@ class Quest
     }
 
     /**
-     * @return Collection<Uuid, User>
+     * @return array
      */
-    #[Ignore]
-    public function getPlayers(): Collection
+    public function getPlayers(): array
     {
-        return $this->players;
+        return $this->players->getValues();
     }
 
     public function addPlayer(User $user): static

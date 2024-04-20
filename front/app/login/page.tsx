@@ -1,4 +1,9 @@
+"use client";
+
+import LoginForm from "../ui/login/login";
 
 export default function Page() {
-    return <p>Login</p>;
+    return <div>
+      <LoginForm />
+    </div>;
   }

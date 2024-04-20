@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use ApiPlatform\Metadata\ApiResource;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -19,7 +20,7 @@ class LoginController extends AbstractController
             'uuid'  => $user->getId()
         ]);
     }
-
+    /*
     #[Route('/api/logout', name: 'api_logout', methods: ['GET', 'POST'])]
     public function logout(#[CurrentUser] ?User $user, Security $security): JsonResponse
     {
@@ -28,5 +29,5 @@ class LoginController extends AbstractController
         return $this->json([
             'message' => 'Successfully logged out.',
         ], Response::HTTP_OK);
-    }
+    }*/
 }

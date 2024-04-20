@@ -2,7 +2,16 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Get;
 use App\Repository\UserRepository;
+use App\State\UserPasswordHasherProcessor;
+use App\State\UserRegistrationProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -10,11 +19,21 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Uid\Uuid;
-use Symfony\Component\Serializer\Annotation\MaxDepth;
+use Symfony\Component\Serializer\Annotation\Groups;
 
+#[ApiResource(
+    operations: [
+        new GetCollection(),
+        new Post(validationContext: ['groups' => ['user:create']], processor: UserRegistrationProcessor::class),
+        new Get(),
+        new Patch(security: "is_granted('ROLE_ADMIN') or (object == user)", processor: UserPasswordHasherProcessor::class),
+        new Delete(security: "is_granted('ROLE_ADMIN') or (object == user)"),
+    ],
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:create', 'user:update']],
+)]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
@@ -27,20 +46,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    #[Assert\Uuid]
+    #[Groups(['user:read', 'quest:players'])]
     private ?Uuid $id = null;
 
     #[ORM\Column( type: 'string', length: 180, nullable: false)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 6, max: 180)]
+    #[Groups(['user:read', 'user:create', 'user:update', 'quest:read', 'quest:players'])]
     private ?string $username = null;
 
-    #[ORM\Column( type: 'string', length: 320, nullable: false)]
+    #[ORM\Column( type: 'string', length: 320, unique: true, nullable: false)]
     #[Assert\NotBlank]
     #[Assert\Email]
+    #[Groups(['user:read', 'user:create', 'user:update', 'quest:players'])]
     private ?string $email = null;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: false)]
+    #[Groups(['user:read'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     /**
@@ -50,16 +72,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private array $roles = [];
 
     /**
-     * @var string The hashed password
+     * @var string|null The hashed password
      */
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(type: 'string', nullable: false)]
     private ?string $password = null;
 
-    #[ORM\Column(type: 'boolean', nullable: false)]
-    private $isVerified = false;
+    #[Assert\NotBlank(groups: ['user:create'])]
+    #[Groups(['user:create', 'user:update'])]
+    private ?string $plainPassword = null;
 
     #[ORM\Column(type: 'boolean', nullable: false)]
-    private $isBanned = false;
+    #[Groups(['user:read'])]
+    #[ApiProperty(security: "is_granted('ROLE_ADMIN')")]
+    private bool $verified = false;
+
+    #[ORM\Column(type: 'boolean', nullable: false)]
+    #[Groups(['user:read', 'user:update'])]
+    #[ApiProperty(security: "is_granted('ROLE_ADMIN')")]
+    private bool $banned = false;
 
     #[ORM\OneToMany(targetEntity: Quest::class, mappedBy: 'creator')]
     private Collection $createdQuests;
@@ -107,7 +137,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      *
      * @see UserInterface
      */
-    #[Ignore]
     public function getUserIdentifier(): string
     {
         return (string) $this->username;
@@ -117,7 +146,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @see UserInterface
      * @return list<string>
      */
-    #[Ignore]
     public function getRoles(): array
     {
         $roles = $this->roles;
@@ -140,7 +168,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @see PasswordAuthenticatedUserInterface
      */
-    #[Ignore]
     public function getPassword(): string
     {
         return $this->password;
@@ -153,35 +180,47 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(?string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
+
+        return $this;
+    }
+
     /**
      * @see UserInterface
      */
     public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
+        $this->plainPassword = null;
     }
 
     public function isVerified(): bool
     {
-        return $this->isVerified;
+        return $this->verified;
     }
 
-    public function setIsVerified(bool $isVerified): static
+    public function setVerified(bool $verified): self
     {
-        $this->isVerified = $isVerified;
+        $this->verified = $verified;
 
         return $this;
     }
 
     public function isBanned(): bool
     {
-        return $this->isBanned;
+        return $this->banned;
     }
 
-    public function setIsBanned(bool $isBanned): static
+    public function setBanned(bool $isBanned): self
     {
-        $this->isBanned = $isBanned;
+        $this->banned = $isBanned;
 
         return $this;
     }
@@ -198,15 +237,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<Uuid, Quest>
+     * @return array
      */
-    #[Ignore]
-    public function getCreatedQuests(): Collection
+    public function getCreatedQuests(): array
     {
-        return $this->createdQuests;
+        return $this->createdQuests->getValues();
     }
 
-    public function addCreatedQuest(Quest $quest): static
+    public function addCreatedQuest(Quest $quest): self
     {
         if (!$this->createdQuests->contains($quest)) {
             $this->createdQuests->add($quest);
@@ -216,7 +254,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function removeCreatedQuest(Quest $quest): static
+    public function removeCreatedQuest(Quest $quest): self
     {
         if ($this->createdQuests->removeElement($quest)) {
             // set the owning side to null (unless already changed)
@@ -229,15 +267,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<Uuid, Quest>
+     * @return array
      */
-    #[Ignore]
-    public function getJoinedQuests(): Collection
+    public function getJoinedQuests(): array
     {
-        return $this->joinedQuests;
+        return $this->joinedQuests->getValues();
     }
 
-    public function addJoinedQuest(Quest $joinedQuest): static
+    public function addJoinedQuest(Quest $joinedQuest): self
     {
         if (!$this->joinedQuests->contains($joinedQuest)) {
             $this->joinedQuests->add($joinedQuest);
@@ -246,7 +283,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function removeJoinedQuest(Quest $joinedQuest): static
+    public function removeJoinedQuest(Quest $joinedQuest): self
     {
         $this->joinedQuests->removeElement($joinedQuest);
 

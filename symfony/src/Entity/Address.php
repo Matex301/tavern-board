@@ -3,18 +3,22 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
 
 #[ORM\Embeddable]
 class Address
 {
     #[ORM\Column(length: 80, nullable: false)]
+    #[Groups(['tavern:read', 'tavern:create', 'tavern:update'])]
     private string $street;
 
     #[ORM\Column(length: 80, nullable: false)]
+    #[Groups(['tavern:read', 'tavern:create', 'tavern:update'])]
     private string $city;
 
     #[ORM\Column(length: 80, nullable: false)]
+    #[Groups(['tavern:read', 'tavern:create', 'tavern:update'])]
     private string $country;
 
     public function __construct(string $country, string $city, string $street) {
@@ -23,7 +27,6 @@ class Address
         $this->street = $street;
     }
 
-    #[Ignore]
     public function getStreet(): string
     {
         return $this->street;
@@ -34,7 +37,6 @@ class Address
         $this->street = $street;
     }
 
-    #[Ignore]
     public function getCity(): string
     {
         return $this->city;
@@ -45,7 +47,6 @@ class Address
         $this->city = $city;
     }
 
-    #[Ignore]
     public function getCountry(): string
     {
         return $this->country;
@@ -55,9 +56,10 @@ class Address
     {
         $this->country = $country;
     }
-
+/*
     public function __toString(): string
     {
         return $this->street . ', ' . $this->city . ', ' . $this->country;
     }
+*/
 }
