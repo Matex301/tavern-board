@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Get;
@@ -30,6 +31,18 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new Get(),
         new Patch(security: "is_granted('ROLE_ADMIN') or (object == user)", processor: UserPasswordHasherProcessor::class),
         new Delete(security: "is_granted('ROLE_ADMIN') or (object == user)"),
+        new GetCollection(
+            uriTemplate: "/quests/{id}/players",
+            uriVariables: [
+                'id' => new Link(
+                    fromProperty: 'players',
+                    toProperty: 'joinedQuests',
+                    fromClass: Quest::class,
+                    toClass: User::class,
+                )
+            ],
+            security: 'is_granted("ROLE_ADMIN") or is_granted("QUEST_CREATOR", object)',
+        ),
     ],
     normalizationContext: ['groups' => ['user:read']],
     denormalizationContext: ['groups' => ['user:create', 'user:update']],
@@ -46,19 +59,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    #[Groups(['user:read', 'quest:players'])]
+    #[Groups(['user:read'])]
     private ?Uuid $id = null;
 
     #[ORM\Column( type: 'string', length: 180, nullable: false)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 6, max: 180)]
-    #[Groups(['user:read', 'user:create', 'user:update', 'quest:read', 'quest:players'])]
+    #[Groups(['user:read', 'user:create', 'user:update', 'quest:read'])]
     private ?string $username = null;
 
     #[ORM\Column( type: 'string', length: 320, unique: true, nullable: false)]
     #[Assert\NotBlank]
     #[Assert\Email]
-    #[Groups(['user:read', 'user:create', 'user:update', 'quest:players'])]
+    #[Groups(['user:read', 'user:create', 'user:update'])]
     private ?string $email = null;
 
     #[ORM\Column(type: 'datetime_immutable', nullable: false)]

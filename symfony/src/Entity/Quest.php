@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Controller\QuestLeaveController;
@@ -34,11 +35,10 @@ use App\Controller\QuestJoinController;
         new GetCollection(),
         new Post(security: "is_granted('ROLE_USER')", validationContext: ['groups' => ['quest:create']], processor: QuestRegistrationProcessor::class),
         new Get(),
-        new Get(uriTemplate: "/quests/{id}/players", normalizationContext: ['groups' => ['quest:players']], security: "is_granted('ROLE_ADMIN') or (object.creator == user)"),
         new Patch(security: "is_granted('ROLE_ADMIN') or (object.creator == user)"),
         new Delete(security: "is_granted('ROLE_ADMIN') or (object.creator == user)"),
         new Post(
-            uriTemplate: "/quests/{id}/participation",
+            uriTemplate: "/quests/{id}/join",
             controller: QuestJoinController::class,
             openapi: new Model\Operation(
                 responses: [
@@ -63,7 +63,7 @@ use App\Controller\QuestJoinController;
             security: "is_granted('ROLE_USER')",
         ),
         new Delete(
-            uriTemplate: "/quests/{id}/participation",
+            uriTemplate: "/quests/{id}/join",
             controller: QuestLeaveController::class,
             openapi: new Model\Operation(
                 responses: [
@@ -86,7 +86,27 @@ use App\Controller\QuestJoinController;
 
             ),
             security: "is_granted('ROLE_USER')",
-        )
+        ),
+        new GetCollection(
+            uriTemplate: '/users/{id}/joined',
+            uriVariables: [
+                'id' => new Link(
+                    fromProperty: 'joinedQuests',
+                    fromClass: User::class,
+                )
+            ],
+            security: 'is_granted("ROLE_ADMIN") or is_granted("USER_ID", object)'
+        ),
+        new GetCollection(
+            uriTemplate: '/users/{id}/created',
+            uriVariables: [
+                'id' => new Link(
+                    fromProperty: 'createdQuests',
+                    fromClass: User::class,
+                )
+            ],
+            security: 'is_granted("ROLE_ADMIN") or is_granted("USER_ID", object)'
+        ),
     ],
     normalizationContext: ['groups' => ['quest:read']],
     denormalizationContext: ['groups' => ['quest:create', 'quest:update']],
@@ -160,7 +180,6 @@ class Quest
     private ?Tavern $tavern = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'joinedQuests')]
-    #[Groups(['quest:players'])]
     private Collection $players;
 
     public function __construct()
