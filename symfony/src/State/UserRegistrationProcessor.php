@@ -42,11 +42,11 @@ final readonly class UserRegistrationProcessor implements ProcessorInterface
 
         $result = $this->processor->process($data, $operation, $uriVariables, $context);
 
-        $this->emailVerifier->sendEmailConfirmation('api_verify_email', $data,
+        $this->emailVerifier->sendEmailConfirmation('api_verify', $data,
             (new TemplatedEmail())
                 ->from(new Address('mailer@tavern-board.local', 'Tavern Board'))
                 ->to($data->getEmail())
-                ->subject('Please Confirm your Email')
+                ->subject('Please confirm your email')
                 ->htmlTemplate('registration/confirmation_email.html.twig')
         );
 

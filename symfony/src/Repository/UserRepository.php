@@ -4,11 +4,14 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\Tools\Pagination\Paginator;
+use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @extends ServiceEntityRepository<User>
@@ -18,7 +21,7 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  * @method User[]    findAll()
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
+class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface, UserLoaderInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -37,27 +40,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user->setPassword($newHashedPassword);
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
-    }
-
-    public function findAllPagination($page = 1, $per = 50): array
-    {
-        $query = $this->createQueryBuilder('u')
-            ->orderBy('u.id', 'ASC')
-            ->getQuery();
-        $paginator = new Paginator($query);
-        $paginator->getQuery()
-            ->setFirstResult($per * ($page - 1))
-            ->setMaxResults($per);
-
-        $info = [
-            'max_items' => $paginator->count(),
-            'min_page' => 1,
-            'max_page' => ceil($paginator->count() / $per),
-            'current_page' => $page,
-            'per_page' => $per
-        ];
-
-        return ['_info' => $info, '_data' => $paginator];
     }
 
 //    /**
@@ -84,4 +66,23 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 //            ->getOneOrNullResult()
 //        ;
 //    }
+    public function loadUserByIdentifier(string $identifier): ?UserInterface
+    {
+        $entityManager = $this->getEntityManager();
+        if(Uuid::isValid($identifier)) {
+            return $entityManager->createQuery(
+                'SELECT u
+                FROM App\Entity\User u
+                WHERE u.id = :query')
+                ->setParameter('query', $identifier, UuidType::NAME)
+                ->getOneOrNullResult();
+        }
+
+        return $entityManager->createQuery(
+            'SELECT u
+                FROM App\Entity\User u
+                WHERE u.username = :query')
+            ->setParameter('query', $identifier)
+            ->getOneOrNullResult();
+    }
 }

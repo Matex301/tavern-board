@@ -22,28 +22,6 @@ class TavernRepository extends ServiceEntityRepository
         parent::__construct($registry, Tavern::class);
     }
 
-    public function findAllPagination($page = 1, $per = 50): array
-    {
-        $query = $this->createQueryBuilder('t')
-            ->orderBy('t.id', 'ASC')
-            ->getQuery();
-
-        $paginator = new Paginator($query);
-        $paginator->getQuery()
-            ->setFirstResult($per * ($page - 1))
-            ->setMaxResults($per);
-
-        $info = [
-            'max_items' => $paginator->count(),
-            'min_page' => 1,
-            'max_page' => ceil($paginator->count() / $per),
-            'current_page' => $page,
-            'per_page' => $per
-        ];
-
-        return ['_info' => $info, '_data' => $paginator];
-    }
-
 //    /**
 //     * @return Tavern[] Returns an array of Tavern objects
 //     */

@@ -59,7 +59,7 @@ class Tavern
     private Collection $quests;
 
     #[ORM\Embedded(class: Address::class)]
-    #[Groups(['tavern:read', 'tavern:create', 'tavern:update'])]
+    #[Groups(['tavern:read', 'tavern:create', 'tavern:update', 'quest:read'])]
     #[ApiProperty(genId: false)]
     private Address $address;
 

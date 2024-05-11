@@ -45,7 +45,7 @@ class Game
     #[ORM\Column(length: 255, nullable: false)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 1, max: 255)]
-    #[Groups(['game:read', 'game:create', 'game:update'])]
+    #[Groups(['game:read', 'game:create', 'game:update', 'quest:read'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]

@@ -12,14 +12,14 @@ use App\Entity\User;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 class LoginController extends AbstractController
-{
+{/*
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
     public function login(#[CurrentUser] ?User $user): JsonResponse
     {
         return $this->json([
             'uuid'  => $user->getId()
         ]);
-    }
+    }*/
     /*
     #[Route('/api/logout', name: 'api_logout', methods: ['GET', 'POST'])]
     public function logout(#[CurrentUser] ?User $user, Security $security): JsonResponse

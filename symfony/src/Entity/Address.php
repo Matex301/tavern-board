@@ -10,15 +10,15 @@ use Symfony\Component\Serializer\Attribute\Ignore;
 class Address
 {
     #[ORM\Column(length: 80, nullable: false)]
-    #[Groups(['tavern:read', 'tavern:create', 'tavern:update'])]
+    #[Groups(['tavern:read', 'tavern:create', 'tavern:update', 'quest:read'])]
     private string $street;
 
     #[ORM\Column(length: 80, nullable: false)]
-    #[Groups(['tavern:read', 'tavern:create', 'tavern:update'])]
+    #[Groups(['tavern:read', 'tavern:create', 'tavern:update', 'quest:read'])]
     private string $city;
 
     #[ORM\Column(length: 80, nullable: false)]
-    #[Groups(['tavern:read', 'tavern:create', 'tavern:update'])]
+    #[Groups(['tavern:read', 'tavern:create', 'tavern:update', 'quest:read'])]
     private string $country;
 
     public function __construct(string $country, string $city, string $street) {
