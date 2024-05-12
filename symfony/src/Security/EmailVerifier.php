@@ -28,8 +28,14 @@ class EmailVerifier
             ['id' => $user->getId()]
         );
 
+        $redirectUrl = 'http://localhost:3000/verify';
+        $parts = parse_url($signatureComponents->getSignedUrl());
+        parse_str($parts['query'], $params);
+        $url = $redirectUrl .'?'. http_build_query($params);
+
         $context = $email->getContext();
-        $context['signedUrl'] = $signatureComponents->getSignedUrl();
+        //$context['signedUrl'] = $signatureComponents->getSignedUrl();
+        $context['signedUrl'] = $url;
         $context['expiresAtMessageKey'] = $signatureComponents->getExpirationMessageKey();
         $context['expiresAtMessageData'] = $signatureComponents->getExpirationMessageData();
 

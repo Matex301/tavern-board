@@ -53,6 +53,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
 #[UniqueEntity(fields: ['username'], message: 'There is already an account with this username')]
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
+#[UniqueEntity(fields: ['username'], message: 'There is already an account with this username', groups: ['user:create'])]
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email', groups: ['user:create'])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -62,15 +64,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read'])]
     private ?Uuid $id = null;
 
-    #[ORM\Column( type: 'string', length: 180, nullable: false)]
+    #[ORM\Column( type: 'string', length: 180, unique: true, nullable: false)]
     #[Assert\NotBlank]
+    #[Assert\NotBlank(groups: ['user:create'])]
     #[Assert\Length(min: 6, max: 180)]
+    #[Assert\Length(min: 6, max: 180, groups: ['user:create'])]
     #[Groups(['user:read', 'user:create', 'user:update', 'quest:read'])]
     private ?string $username = null;
 
     #[ORM\Column( type: 'string', length: 320, unique: true, nullable: false)]
     #[Assert\NotBlank]
+    #[Assert\NotBlank(groups: ['user:create'])]
     #[Assert\Email]
+    #[Assert\Email(groups: ['user:create'])]
+    #[Assert\Length(min: 3, max: 320)]
+    #[Assert\Length(min: 3, max: 320, groups: ['user:create'])]
     #[Groups(['user:read', 'user:create', 'user:update'])]
     private ?string $email = null;
 

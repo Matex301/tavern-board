@@ -4,7 +4,8 @@ import { Game } from "../types/Game";
 import { PagedCollection } from "../types/collection"
 
 export async function fetchGames(signal: AbortSignal, page: number) {
-    let url = `http://localhost:8000/api/games?page=${page}`;
+    let url = new URL('http://localhost:8000/api/games');
+    url.searchParams.set('page', page.toString());
 
     //console.log(url);
     

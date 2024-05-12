@@ -8,7 +8,7 @@ interface Send {
 }
 
 export async function fetchJWT(username: string, password: string) {
-    let url = `http://localhost:8000/api/login`;
+    let url = new URL('http://localhost:8000/api/login');
     let send: Send = {
         "username": username,
         "password": password
@@ -81,7 +81,8 @@ export async function fetchUser() {
         return null;
     const parse = parseJwt(token);
 
-    const url = `http://localhost:8000/api/users/${parse.id}`;
+    let url = new URL(`http://localhost:8000/api/users/${parse.id}`);
+    
     try {
         const response = await fetch(url, {
             method: "GET",
