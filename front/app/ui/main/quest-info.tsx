@@ -19,7 +19,7 @@ export default function QuestInfo() {
 
     useEffect(() => {
         const quest = searchParams.get("quest");
-        console.log(quest);
+
         if(!quest)
             return;
 

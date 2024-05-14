@@ -154,14 +154,13 @@ class Quest
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: false)]
-    #[Assert\DateTime, Assert\NotBlank]
+    #[Assert\NotBlank]
     #[Groups(['quest:read', 'quest:create', 'quest:update'])]
     #[ApiFilter(DateFilter::class)]
     #[ApiFilter(OrderFilter::class)]
     private ?\DateTimeImmutable $startAt = null;
 
     #[ORM\Column(nullable: true)]
-    #[Assert\DateTime]
     #[Groups(['quest:read', 'quest:create', 'quest:update'])]
     private ?\DateTimeImmutable $endAt = null;
 

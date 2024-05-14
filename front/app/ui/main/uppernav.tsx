@@ -8,9 +8,16 @@ const inknut_antiqua = Inknut_Antiqua({weight:"400", subsets: ['latin'] });
 
 export default function UpperNav() {
     const [username, setUsername] = useState<string|undefined>();
+    const [loading, setLoading] = useState(false);
 
+    let once = false;
     useEffect(() => {
+        if(once)
+            return;
+        once = true;
+        setLoading(true);
         fetchUser().then((user) => {
+            setLoading(false);
             setUsername(user?.username);
         });
     },[]);
@@ -24,7 +31,8 @@ export default function UpperNav() {
                 <Search placeholder="Search..." />
             </div>
             <div className='flex flex-row p-1 items-center gap-2'>
-                <p className='text-xl hidden md:block'>{username}</p>
+                {username && <p className='text-xl hidden md:block'>{username}</p>}
+                {loading && <div className='hidden md:block w-32 h-8 animate-pulse rounded-md bg-slate-200'></div>}
                 <Avatar />
             </div>
         </div>

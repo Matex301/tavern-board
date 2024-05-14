@@ -5,14 +5,19 @@ import { UserIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import Spinner from './spinner';
 import { useRouter } from 'next/navigation';
 import { createUser } from '@/app/api-actions/registration';
+import ErrorMessage from './error-message';
 
 export default function Registration({setTab}: {setTab: Dispatch<SetStateAction<number>>}) {
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string|null>(null);
+    const [success, setSuccess] = useState(false);
     const router = useRouter();
 
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        setSuccess(false);
         setLoading(true);
+        let data;
 
         try {
             const fromData = new FormData(event.currentTarget);
@@ -25,16 +30,17 @@ export default function Registration({setTab}: {setTab: Dispatch<SetStateAction<
                 return;
             }
 
-            let response = await createUser(username, email, password);
-            console.log(response);
+            data = await createUser(username, email, password);
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
         }
 
-        if(false) {
-            router.push('/login');
+        if(data?.status == 201) {
+            setSuccess(true);
+        } else {
+            setError(data?.message);
         }
     }
 
@@ -45,7 +51,8 @@ export default function Registration({setTab}: {setTab: Dispatch<SetStateAction<
             <PasswordInput />
 
             <div className="h-auto w-full grow rounded-md bg-slate-50"></div>
-
+            {error && <ErrorMessage error={error}/>}
+            {success && <SuccessMessage />}
             {loading && <Spinner />}
 
             <div className="flex flex-col h-auto w-full justify-between items-center my-4 gap-1">
@@ -115,5 +122,13 @@ function PasswordInput() {
                     />
             </div>
         </>
+    );
+}
+
+function SuccessMessage() {
+    return (
+        <p className='flex w-4/5 md:w-3/5 p-2 text-ellipsis overflow-hidden line-clamp-2 bg-green-300 rounded-lg outline outline-green-400 outline-2 text-sm text-gray-500 justify-center'>
+            Account created, please check your email.
+        </p>
     );
 }

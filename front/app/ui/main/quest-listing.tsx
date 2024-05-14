@@ -18,7 +18,7 @@ export default function QuestListing({quests}: any) {
               <div className="flex flex-row md:pr-4 grow">
                 <div className="m-3 w-48 h-48 relative">
                   <Image
-                      src="/quest-listing-templet.jpg"
+                      src={(quest.image || quest.game.image) || "/quest-listing-templet.jpg"}
                       alt="Picture of the author"
                       fill={true}
                       className="object-cover"

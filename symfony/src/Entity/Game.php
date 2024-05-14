@@ -53,7 +53,7 @@ class Game
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['game:read', 'game:create', 'game:update'])]
+    #[Groups(['game:read', 'game:create', 'game:update', 'quest:read'])]
     private ?string $image = null;
 
     #[ORM\Column(nullable: true)]

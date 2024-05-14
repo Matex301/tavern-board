@@ -16,7 +16,7 @@ export default function GameListing({games}: any) {
             <div className="flex flex-row md:pr-4 grow">
               <div className="m-3 w-48 h-48 relative">
                 <Image
-                  src="/game-listing-templet.webp"
+                  src={game.image || "/game-listing-templet.webp"}
                   alt="Picture of the author"
                   fill={true}
                   className="object-cover"

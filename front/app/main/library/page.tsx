@@ -10,10 +10,12 @@ export default function Page() {
     return (
         <div className="container mx-auto p-2 min-h-screen">
             <div className="flex flex-col md:flex-row w-full pb-2 gap-4">
-                <SearchGame />
-                <SearchDate setDate={setDate}/>
+
             </div>
                 <LoadGames />
         </div>
     );
 }
+
+//<SearchGame />
+//<SearchDate setDate={setDate}/>

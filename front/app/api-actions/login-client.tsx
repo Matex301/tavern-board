@@ -26,11 +26,11 @@ export async function fetchJWT(username: string, password: string) {
 
         const data = await response.json();
 
-        if(data.token) {
+        if(data.token && response.status == 200) {
             localStorage.setItem('Authorization', data.token);
         }
-
-        return data.token;
+        
+        return {token: data.token, status: response.status, message: data.message};
     } catch(error) {
         console.error("fetchLogin", error);
         return null;
@@ -48,8 +48,8 @@ export function getUserId() {
     }
     
     const parse = parseJwt(token);
-    console.log('exp:' + parse.exp * 1000);
-    console.log('now:' + (new Date()).getTime());
+    //console.log('exp:' + parse.exp * 1000);
+    //console.log('now:' + (new Date()).getTime());
     if((parse.exp * 1000) < (new Date()).getTime()) {
         deleteJWT();
         return null;

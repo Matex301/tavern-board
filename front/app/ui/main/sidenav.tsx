@@ -4,6 +4,7 @@ import NavLinks from '@/app/ui/main/nav-links';
 import { PowerIcon } from '@heroicons/react/24/outline';
 import { deleteJWT, getUserId } from '@/app/api-actions/login-client';
 import { Dispatch, useEffect, useState } from 'react';
+import Link from 'next/link'
 
 export default function SideNav() {
   const [userId, setUserId] = useState<string|null>(null);
@@ -44,11 +45,11 @@ function LogoutButton({setUserId}: {setUserId: Dispatch<string|null>}) {
 
 function LoginButton() {
   return (
-    <a className="flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-slate-200 p-3 text-sm font-medium hover:bg-slate-300 md:flex-none md:justify-start md:p-2 md:px-3"
+    <Link className="flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-slate-200 p-3 text-sm font-medium hover:bg-slate-300 md:flex-none md:justify-start md:p-2 md:px-3"
       href='/login'
     >
       <PowerIcon className="w-6" />
       <div className="hidden md:block" >Sign In</div>
-    </a>
+    </Link>
   );
 }

@@ -5,31 +5,34 @@ import { UserIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import Spinner from './spinner';
 import { fetchJWT } from '@/app/api-actions/login-client';
 import { useRouter } from 'next/navigation';
+import ErrorMessage from './error-message';
 
 export default function Login({setTab}: {setTab: Dispatch<SetStateAction<number>>}) {
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string|null>(null);
     const router = useRouter();
 
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setLoading(true);
-        let token;
+        let data;
 
         try {
             const fromData = new FormData(event.currentTarget);
             let username: string = fromData.get('username')?.toString() ?? "";
             let password: string = fromData.get('password')?.toString() ?? "";
 
-            token = await fetchJWT(username, password);
-            console.log(token);
+            data = await fetchJWT(username, password);
         } catch (error) {
             console.error(error);
         } finally {
             setLoading(false);
         }
 
-        if(token) {
+        if(data?.status == 200) {
             router.push('/main');
+        } else {
+            setError(data?.message);
         }
     }
 
@@ -39,7 +42,7 @@ export default function Login({setTab}: {setTab: Dispatch<SetStateAction<number>
             <PasswordInput />
 
             <div className="h-auto w-full grow rounded-md bg-slate-50"></div>
-
+            {error && <ErrorMessage error={error}/>}
             {loading && <Spinner />}
 
             <div className="flex flex-col h-auto w-full justify-between items-center my-4 gap-1">
@@ -62,7 +65,7 @@ function UsernameInput() {
                 type="text" 
                 name="username"
                 placeholder="Username"
-                className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-md outline-2 placeholder:text-gray-500"
+                className="peer block w-full rounded-md outline outline-gray-200 outline-2 py-[9px] pl-10 text-md placeholder:text-gray-500"
                 required
             />
         </div>
@@ -77,7 +80,7 @@ function PasswordInput() {
                 type="password"
                 name="password"
                 placeholder="Password"
-                className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-md outline-2 placeholder:text-gray-500"
+                className="peer block w-full rounded-md outline outline-gray-200 outline-2 py-[9px] pl-10 text-md placeholder:text-gray-500"
                 required
             />
         </div>

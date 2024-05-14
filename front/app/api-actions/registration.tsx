@@ -25,8 +25,7 @@ export async function createUser(username: string, email : string, password: str
         });
 
         const data = await response.json();
-
-        return data;
+        return {status: response.status, message: data.detail};
     } catch(error) {
         console.error("createUser", error);
         return null;
