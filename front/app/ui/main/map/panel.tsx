@@ -1,13 +1,13 @@
 "use client";
 
 import React from 'react';
-import { Popover, Transition } from '@headlessui/react'
+import { Transition } from '@headlessui/react'
 import {
     MagnifyingGlassIcon,
     GlobeAltIcon,
     PhoneIcon,
     ArrowRightIcon 
-  } from '@heroicons/react/24/outline';
+} from '@heroicons/react/24/outline';
 
 import { Inknut_Antiqua } from "next/font/google";
 const inknut_antiqua = Inknut_Antiqua({weight:"400", subsets: ['latin'] });

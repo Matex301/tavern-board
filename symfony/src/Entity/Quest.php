@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
@@ -27,6 +28,7 @@ use App\State\QuestRegistrationProcessor;
 use OpenApi\Attributes as OA;
 use ApiPlatform\OpenApi\Model;
 use App\Controller\QuestJoinController;
+use Webstack\ApiPlatformExtensionsBundle\Filter\UuidFilter;
 
 //TODO Allow admin role to add quest and join them on behalf of others
 
@@ -106,6 +108,15 @@ use App\Controller\QuestJoinController;
                 )
             ],
             security: 'is_granted("ROLE_ADMIN") or is_granted("USER_ID", object)'
+        ),
+        new GetCollection(
+            uriTemplate: '/games/{id}/quests',
+            uriVariables: [
+                'id' => new Link(
+                    fromProperty: 'quests',
+                    fromClass: Game::class,
+                )
+            ]
         ),
     ],
     normalizationContext: ['groups' => ['quest:read']],

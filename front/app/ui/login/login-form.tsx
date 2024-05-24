@@ -15,6 +15,7 @@ export default function Login({setTab}: {setTab: Dispatch<SetStateAction<number>
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setLoading(true);
+        setError(null);
         let data;
 
         try {

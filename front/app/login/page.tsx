@@ -1,9 +1,11 @@
 "use client"
 import { Transition } from '@headlessui/react'
 import { useState } from 'react';
+import Link from 'next/link';
 import { Inknut_Antiqua } from "next/font/google";
 import Login from '@/app/ui/login/login-form';
-import Registration from '../ui/login/registration-form';
+import Registration from '@/app/ui/login/registration-form';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 const inknut_antiqua = Inknut_Antiqua({weight:"400", subsets: ['latin'] });
 
 export default function Page() {
@@ -20,10 +22,11 @@ export default function Page() {
         leave="transition ease-in-out duration-400"
         leaveFrom="translate-x-0"
         leaveTo="-translate-x-[220%]"
-        className="flex flex-col w-full md:w-1/4 bg-slate-100 rounded-lg border border-gray-200 outline-5"
+        className="flex flex-col w-full md:w-1/4 bg-slate-100 rounded-lg border border-gray-200 outline-5 relative"
         afterLeave={() => {setTab(2);}}
       > 
-        <h1 className={`${inknut_antiqua.className} antialiased mt-5 p-5 text-4xl text-center`}>Tavern Board</h1>
+        <BackButton />
+        <Header />
         <Login setTab={setTab}/>
       </Transition>
 
@@ -35,13 +38,28 @@ export default function Page() {
         leave="transition ease-in-out duration-400"
         leaveFrom="translate-x-0"
         leaveTo="translate-x-[220%]"
-        className="flex flex-col w-full md:w-1/4 bg-slate-100 rounded-b-lg border border-t-0 border-gray-200 outline-5"
+        className="flex flex-col w-full md:w-1/4 bg-slate-100 rounded-lg border border-gray-200 outline-5 relative"
         afterLeave={() => {setTab(1);}}
       >
-        <h1 className={`${inknut_antiqua.className} antialiased mt-5 p-5 text-4xl text-center`}>Tavern Board</h1>
+        <BackButton />
+        <Header />
         <Registration setTab={setTab} />
       </Transition>
       </div>
+  );
+}
+
+function Header() {
+  return (
+    <h1 className={`${inknut_antiqua.className} antialiased mt-5 p-5 pt-6 text-4xl text-center`}>Tavern Board</h1>
+  );
+}
+
+function BackButton() {
+  return (
+    <Link href="/" className='absolute top-0 right-0 p-2 text-black hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-black'>
+      <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+    </Link>
   );
 }
 

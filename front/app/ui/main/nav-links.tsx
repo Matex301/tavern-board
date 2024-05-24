@@ -6,19 +6,27 @@ import {
   ClipboardDocumentCheckIcon,
   BookOpenIcon
 } from '@heroicons/react/24/outline';
+import { useEffect, useState } from 'react';
+import { getUserId } from '@/app/api-actions/login-client';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link'
 import clsx from 'clsx';
 
 const links = [
-  { name: 'Find Quests', href: '/main', icon: MagnifyingGlassIcon },
-  { name: 'Tavern Map', href: '/main/map', icon: MapIcon},
-  { name: 'Accepted Quests', href: '/main/history', icon: ClipboardDocumentCheckIcon },
-  { name: 'Game Library', href: '/main/library', icon: BookOpenIcon }
+  { name: 'Find Quests', href: '/main', icon: MagnifyingGlassIcon, login: false },
+  { name: 'Tavern Map', href: '/main/map', icon: MapIcon, login: false },
+  { name: 'Accepted Quests', href: '/main/history', icon: ClipboardDocumentCheckIcon, login: true },
+  { name: 'Game Library', href: '/main/games', icon: BookOpenIcon, login: false }
 ];
 
 export default function NavLinks() {
   const pathname = usePathname();
+
+  const [userId, setUserId] = useState<string|null>(null);
+
+  useEffect(() => {
+    setUserId(getUserId());
+  },[]);
 
   return (
     <>
@@ -32,7 +40,8 @@ export default function NavLinks() {
               'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-slate-200 p-3 text-sm font-medium hover:bg-slate-400 md:flex-none md:justify-start md:p-2 md:px-3',
               {
                 'text-blue-500': pathname === link.href,
-                'text-black': pathname !== link.href
+                'text-black': pathname !== link.href,
+                'hidden': link.login && !userId
               },
             )}
           >

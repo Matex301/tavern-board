@@ -1,6 +1,6 @@
 "use client";
 
-import { User } from "../types/User";
+import { User } from "@/app/types/User";
 
 interface Send {
     username: string,
@@ -58,7 +58,7 @@ export function getUserId() {
     return parse?.id;
 }
 
-function getJWT() {
+export function getJWT() {
     return localStorage.getItem('Authorization');
 }
 

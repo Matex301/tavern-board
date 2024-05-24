@@ -45,6 +45,7 @@ export function LoadGames() {
 
       return () => {
         controller.abort();
+        setLoading(false);
       }
     }
   }, [inView]);

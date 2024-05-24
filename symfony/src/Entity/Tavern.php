@@ -44,7 +44,7 @@ class Tavern
     #[ORM\Column(length: 255, nullable: false)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 6, max: 255)]
-    #[Groups(['tavern:read', 'tavern:create', 'tavern:update'])]
+    #[Groups(['tavern:read', 'tavern:create', 'tavern:update', 'quest:read'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]

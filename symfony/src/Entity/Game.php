@@ -28,6 +28,11 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Get(),
         new Patch(security: "is_granted('ROLE_ADMIN')"),
         new Delete(security: "is_granted('ROLE_ADMIN')"),
+        new GetCollection(
+            uriTemplate: '/quests/name',
+            paginationEnabled: false,
+            normalizationContext: ['groups' => ['quest:names']],
+        ),
     ],
     normalizationContext: ['groups' => ['game:read']],
     denormalizationContext: ['groups' => ['game:create', 'game:update']],
@@ -39,13 +44,13 @@ class Game
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    #[Groups(['game:read'])]
+    #[Groups(['game:read', 'quest:names'])]
     private ?Uuid $id = null;
 
     #[ORM\Column(length: 255, nullable: false)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 1, max: 255)]
-    #[Groups(['game:read', 'game:create', 'game:update', 'quest:read'])]
+    #[Groups(['game:read', 'game:create', 'game:update', 'quest:read', 'quest:names'])]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]

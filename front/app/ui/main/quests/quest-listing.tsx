@@ -6,24 +6,40 @@ import {
   ClockIcon,
   MapPinIcon
 } from '@heroicons/react/24/outline';
+import {useSearchParams, useRouter, usePathname} from "next/navigation";
 import { Quest } from '@/app/types/Quest';
 import Link from "next/link";
 
 export default function QuestListing({quests}: any) {
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+
+  function onClick(id: string | undefined)
+  {
+    if(!id)
+      return;
+
+    const update = new URLSearchParams(params.toString());
+    update.set('quest', id);
+    router.replace(`${pathname}?${update}`);
+  }
+
   return (
     <>
       {(quests?.length !== 0) ? (
         quests.map((quest: Quest) => (
-          <Link href={{query: {quest: quest.id}}} scroll={false} className="flex w-full bg-slate-50 flex-col md:flex-row mb-4 hover:bg-slate-300" key={quest['@id']}>
-              <div className="flex flex-row md:pr-4 grow">
-                <div className="m-3 w-48 h-48 relative">
-                  <Image
-                      src={(quest.image || quest.game.image) || "/quest-listing-templet.jpg"}
-                      alt="Picture of the author"
-                      fill={true}
-                      className="object-cover"
-                    />
-                </div>
+          <div onClick={() => {onClick(quest.id)}} className="flex w-full min-h-52 bg-slate-50 flex-col md:flex-row mb-4 hover:bg-slate-300" key={quest['@id']}>
+              <div className="flex flex-row gap-4 md:pr-4 grow">
+              <div className="w-48 h-48 md:h-full relative">
+                <Image
+                  src={(quest.image || quest.game.image) || "/quest-listing-templet.jpg"}
+                  alt="Picture of the game"
+                  fill={true}
+                  className="object-cover"
+                />
+              </div>
                 <div className="flex flex-col justify-center gap-5">
                   <IconRow LinkIcon={PuzzlePieceIcon} content={quest.game.name} styleName="text-blue-800"/>
                   <IconRow LinkIcon={ClockIcon} content={dateSlicer(quest.startAt, quest.endAt)} styleName="text-blue-600"/>
@@ -34,11 +50,11 @@ export default function QuestListing({quests}: any) {
                 <div className="text-2xl font-bold text-center">
                   {quest.title}
                 </div>
-                <p className="pt-1 text-ellipsis overflow-hidden line-clamp-5">
+                <p className="pt-1 text-ellipsis overflow-hidden line-clamp-5 text-neutral-800">
                   {quest.description}
                 </p>
               </div>
-          </Link>
+          </div>
         ))
       ) : (
         <></>
@@ -60,7 +76,10 @@ const IconRow = function({ LinkIcon, content, styleName}: { LinkIcon: typeof Puz
 };
 
 function dateSlicer(start: any, end: any) {
-  return start.toString().replace(/T/, ' ').replace(/\..+/, '').slice(0, 16) + '-' + end.toString().slice(11, 16);
+  let ret = start.toString().replace(/T/, ' ').replace(/\..+/, '').slice(0, 16);
+  if(end)
+    ret += '-' + end.toString().slice(11, 16);
+  return ret;
 }
 
 export function QuestListingSkeleton() {
@@ -68,9 +87,9 @@ export function QuestListingSkeleton() {
   return (
     <>
       {(arr.map((nr) => (
-        <div className="flex w-full bg-slate-50 flex-col md:flex-row mb-4" key={nr}>
-          <div className="flex flex-row md:pr-4 grow">
-            <div className="m-3 w-48 h-48 animate-pulse rounded-md bg-slate-200">
+        <div className="flex w-full h-52 bg-slate-50 flex-col md:flex-row mb-4" key={nr}>
+          <div className="flex flex-row gap-4 md:pr-4 grow">
+            <div className="w-48 h-48 md:h-full animate-pulse rounded-md bg-slate-200">
       
             </div>
             <div className="flex flex-col justify-center gap-5">

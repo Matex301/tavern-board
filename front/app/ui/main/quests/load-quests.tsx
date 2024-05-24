@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import Spinner from "@/app/ui/main/spinner";
 import { fetchQuests } from "@/app/api-actions/quests";
-import QuestListing, { QuestListingSkeleton } from "./quest-listing";
+import QuestListing, { QuestListingSkeleton } from "@/app/ui/main/quests/quest-listing";
 import { Quest } from "@/app/types/Quest";
 import clsx from "clsx";
 
-export function LoadQuests({date}: {date: Date | undefined}) {
+export function LoadQuests({date, gameId}: {date: Date | undefined, gameId: string | undefined}) {
   const { ref, inView } = useInView({delay: 1000});
   const [quests, setQuests] = useState<Quest[]>([]);
   const [end, setEnd] = useState(false);
@@ -19,7 +19,7 @@ export function LoadQuests({date}: {date: Date | undefined}) {
     //console.log("Page: ", page);
     //console.log("Date: ", date);
 
-    const hydra = await fetchQuests(signal, page, date);
+    const hydra = await fetchQuests(signal, page, date, gameId);
     setLoading(false);
     if(!hydra)
       return;
@@ -51,12 +51,10 @@ export function LoadQuests({date}: {date: Date | undefined}) {
   }, [inView]);
 
   useEffect(() => {
-    if(date) {
       setEnd(false);
       setPage(1);
       setQuests([]);
-    }
-  }, [date]);
+  }, [date, gameId]);
 
   return (
     <>

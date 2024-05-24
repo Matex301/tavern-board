@@ -15,8 +15,9 @@ export default function Registration({setTab}: {setTab: Dispatch<SetStateAction<
 
     async function onSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        setSuccess(false);
         setLoading(true);
+        setSuccess(false);
+        setError(null);
         let data;
 
         try {
