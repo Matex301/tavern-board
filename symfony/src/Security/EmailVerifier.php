@@ -14,9 +14,9 @@ class EmailVerifier
 {
     public function __construct(
         private VerifyEmailHelperInterface $verifyEmailHelper,
-        private MailerInterface $mailer,
-        private EntityManagerInterface $entityManager
-    ) {
+        private EntityManagerInterface $entityManager,
+        private MailerInterface $mailer
+    ){
     }
 
     public function sendEmailConfirmation(string $verifyEmailRouteName, User $user, TemplatedEmail $email): void
@@ -32,7 +32,7 @@ class EmailVerifier
         $parts = parse_url($signatureComponents->getSignedUrl());
         parse_str($parts['query'], $params);
         $url = $redirectUrl .'?'. http_build_query($params);
-
+        error_log($url);
         $context = $email->getContext();
         //$context['signedUrl'] = $signatureComponents->getSignedUrl();
         $context['signedUrl'] = $url;

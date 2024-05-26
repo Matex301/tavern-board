@@ -12,7 +12,7 @@ import {
 
 export default function QuestInfoListing({quest}: any) {
     return (
-        <div className="flex flex-col z-40 bg-white w-5/6 md:w-2/3 overflow-y-auto">
+        <div className="flex flex-col z-40 bg-white w-5/6 md:w-2/3 max-h-[90%] overflow-y-auto">
             <div className="flex flex-col md:flex-row">
                 <div className="h-64 w-full md:w-1/3 md:h-auto relative">
                     <Image
@@ -34,7 +34,7 @@ export default function QuestInfoListing({quest}: any) {
                 </div>
             </div>
             <div className="flex flex-col md:flex-row">
-                <div className="md:w-3/4 text-ellipsis whitespace-pre-line overflow-y-auto p-4 text-neutral-800">
+                <div className="md:w-3/4 text-ellipsis whitespace-pre-line p-4 text-neutral-800">
                     {quest.description}
                 </div>
                 <div className="flex flex-col justify-content gap-4 md:w-1/4 p-4">

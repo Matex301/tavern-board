@@ -5,11 +5,12 @@ namespace App\State;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use App\Entity\User;
+use App\Message\EmailVerifyMessage;
 use App\Security\EmailVerifier;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Component\Mime\Address;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @implements ProcessorInterface<User, User|void>
@@ -20,7 +21,8 @@ final readonly class UserRegistrationProcessor implements ProcessorInterface
         #[Autowire(service: 'api_platform.doctrine.orm.state.persist_processor')]
         private ProcessorInterface $processor,
         private UserPasswordHasherInterface $passwordHasher,
-        private EmailVerifier $emailVerifier
+        private UrlGeneratorInterface $router,
+        private MessageBusInterface $bus
     ){
     }
 
@@ -42,13 +44,8 @@ final readonly class UserRegistrationProcessor implements ProcessorInterface
 
         $result = $this->processor->process($data, $operation, $uriVariables, $context);
 
-        $this->emailVerifier->sendEmailConfirmation('api_verify', $data,
-            (new TemplatedEmail())
-                ->from(new Address('mailer@tavern-board.local', 'Tavern Board'))
-                ->to($data->getEmail())
-                ->subject('Please confirm your email')
-                ->htmlTemplate('registration/confirmation_email.html.twig')
-        );
+        $requestContext = $this->router->getContext();
+        $this->bus->dispatch(new EmailVerifyMessage($data->getId(), $requestContext->getHttpPort(), $requestContext->getHttpsPort()));
 
         return $result;
     }

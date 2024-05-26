@@ -8,7 +8,7 @@ import QuestListing, { QuestListingSkeleton } from "@/app/ui/main/quests/quest-l
 import { Quest } from "@/app/types/Quest";
 import clsx from "clsx";
 
-export function LoadQuests({date, gameId}: {date: Date | undefined, gameId: string | undefined}) {
+export function MainQuests({date, game}: {date: Date | undefined, game: string | undefined}) {
   const { ref, inView } = useInView({delay: 1000});
   const [quests, setQuests] = useState<Quest[]>([]);
   const [end, setEnd] = useState(false);
@@ -16,10 +16,8 @@ export function LoadQuests({date, gameId}: {date: Date | undefined, gameId: stri
   const [loading, setLoading] = useState(false);
 
   const load = async (signal: AbortSignal) => {
-    //console.log("Page: ", page);
-    //console.log("Date: ", date);
 
-    const hydra = await fetchQuests(signal, page, date, gameId);
+    const hydra = await fetchQuests(signal, page, date, game);
     setLoading(false);
     if(!hydra)
       return;
@@ -54,7 +52,7 @@ export function LoadQuests({date, gameId}: {date: Date | undefined, gameId: stri
       setEnd(false);
       setPage(1);
       setQuests([]);
-  }, [date, gameId]);
+  }, [date, game]);
 
   return (
     <>

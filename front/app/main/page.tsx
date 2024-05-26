@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadQuests } from "@/app/ui/main/quests/load-quests";
+import { MainQuests } from "@/app/ui/main/quests/main-quests";
 import SearchDate from "@/app/ui/main/finder/search-date";
 import SearchGame from "@/app/ui/main/finder/search-game";
 import { useEffect, useState } from "react";
@@ -17,7 +17,7 @@ export default function Page() {
                 <SearchDate setDate={setDate}/>
                 <SearchGame setGame={setGame}/>
             </div>
-            {date && <LoadQuests date={date} gameId={game}/>}
+            {date && <MainQuests date={date} game={game}/>}
             <QuestInfo />
         </div>
     );

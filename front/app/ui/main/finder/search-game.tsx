@@ -105,7 +105,7 @@ export default function SearchGame({setGame}: {setGame: Dispatch<string|undefine
 
     return (
         <div className="flex justify-center bg-blue-600 md:w-1/2 rounded-lg relative">
-            <div className="flex justify-center items-center md:w-1/2">
+            <div className="flex justify-center items-center">
                 <Combobox value={selected} onChange={debounced} nullable>
                 <div className="relative w-full h-full">
                     <div className="flex flex-row justify-center items-center gap-1 p-1 relative w-full h-full cursor-default overflow-hidden rounded-md bg-blue-600 text-lg text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">

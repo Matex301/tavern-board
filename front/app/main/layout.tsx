@@ -15,7 +15,7 @@ export default function Layout({
             <div className="w-full flex-none md:w-64 bg-slate-100">
               <SideNav />
             </div>
-            <div className="flex-grow p-4 overflow-y-auto md:p-10 bg-slate-200 no-scrollbar">{children}</div>
+            <div className="flex-grow p-4 md:p-10 pt-2 md:pt-2 overflow-y-auto bg-slate-200 no-scrollbar">{children}</div>
           </div>
         </div>
   );

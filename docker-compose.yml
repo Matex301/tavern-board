@@ -61,6 +61,18 @@ services:
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
     networks:
       - net
+  
+  ph:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+    volumes:
+      - ./docker/rabbitmq/data/:/var/lib/rabbitmq/
+      - ./docker/rabbitmq/log/:/var/log/rabbitmq
       
 networks:
   net:

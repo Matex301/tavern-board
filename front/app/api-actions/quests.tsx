@@ -66,8 +66,12 @@ export async function fetchQuestJoined(signal: AbortSignal, page: number, start:
     let url = new URL(`http://localhost:8000/api/users/${id}/joined`);
     url.searchParams.set('page', page.toString());
 
+    if(game) {
+        url.searchParams.set('game', game);
+    }
+
     if(start) {
-        url.searchParams.set('startAt[after]', start.toISOString());
+        url.searchParams.set('startAt[before]', start.toISOString());
     }
 
     try {
@@ -75,7 +79,8 @@ export async function fetchQuestJoined(signal: AbortSignal, page: number, start:
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${jwt}`
-            }
+            },
+            signal: signal
         });
         const data = await response.json();
         return data as PagedCollection<Quest>;

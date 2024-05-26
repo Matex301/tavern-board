@@ -109,7 +109,7 @@ function ExitButton() {
 
     return (
         <div 
-            className='absolute top-0 right-0 md:top-4 md:right-4 z-30 p-2 text-black hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-black'
+            className='absolute top-0 right-0 md:top-4 md:right-4 z-30 p-1 md:p-2 text-black hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-black'
             onClick={close}
         >
         <XMarkIcon className="h-9 w-9" aria-hidden="true" />

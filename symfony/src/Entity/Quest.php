@@ -28,7 +28,6 @@ use App\State\QuestRegistrationProcessor;
 use OpenApi\Attributes as OA;
 use ApiPlatform\OpenApi\Model;
 use App\Controller\QuestJoinController;
-use Webstack\ApiPlatformExtensionsBundle\Filter\UuidFilter;
 
 //TODO Allow admin role to add quest and join them on behalf of others
 
@@ -124,6 +123,7 @@ use Webstack\ApiPlatformExtensionsBundle\Filter\UuidFilter;
     order: ['startAt' => 'ASC']
 )]
 #[ORM\Entity(repositoryClass: QuestRepository::class)]
+#[ApiFilter(SearchFilter::class, properties: ['game' => 'exact'])]
 #[ORM\HasLifecycleCallbacks]
 class Quest
 {
