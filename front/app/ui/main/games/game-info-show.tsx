@@ -2,44 +2,41 @@ import Image from 'next/image';
 import clsx from 'clsx';
 import { Quest } from '@/app/types/Quest';
 import {
-    PuzzlePieceIcon,
     ClockIcon,
-    MapPinIcon,
-    BuildingStorefrontIcon,
-    UserIcon,
     UserGroupIcon
 } from '@heroicons/react/24/outline';
+import { Game } from '@/app/types/Game';
 
-export default function QuestInfoListing({quest}: any) {
+
+export default function GameInfoShow({game}: {game: Game}) {
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     return (
         <div className="flex flex-col z-40 bg-white w-5/6 md:w-2/3 max-h-[90%] overflow-y-auto">
             <div className="flex flex-col md:flex-row">
-                <div className="h-64 w-full md:w-1/3 md:h-auto relative">
+                <div className="h-64 w-full md:w-1/3 relative">
                     <Image
-                        src={(quest.image || quest.game.image) || "/quest-listing-templet.jpg"}
+                        src={game.image || "/quest-listing-templet.jpg"}
                         alt="Picture of the game"
                         fill={true}
                         objectFit='cover'
-                        className=""
                     />
                 </div>
                 <div className="flex flex-col w-full md:w-2/3 md:h-full justify-center p-4 gap-4">
-                    <div className="text-2xl font-bold text-center">{quest.title}</div>
-                    <IconRow LinkIcon={PuzzlePieceIcon} content={quest.game.name} styleName="text-blue-800"/>
-                    <IconRow LinkIcon={ClockIcon} content={dateSlicer(quest.startAt, quest.endAt)} styleName="text-blue-600"/>
-                    <IconRow LinkIcon={BuildingStorefrontIcon} content={quest.tavern.name} styleName="text-blue-400"/>
-                    <IconRow LinkIcon={MapPinIcon} content={quest.tavern.address.street + ', ' + quest.tavern.address.city + ', ' + quest.tavern.address.country} styleName="text-blue-400"/>
-                    <IconRow LinkIcon={UserGroupIcon} content={playerSlicer(quest.currentPlayers, quest.maxPlayers)} styleName="text-neutral-800"/>
-                    <IconRow LinkIcon={UserIcon} content={quest.creator.username} styleName="text-neutral-800"/>
+                    <div className="text-2xl font-bold text-center">{game.name}</div>
+                    <IconRow LinkIcon={ClockIcon} content={"60 – 120min"} styleName="text-blue-800"/>
+                    <IconRow LinkIcon={UserGroupIcon} content={playersFormatted(game.minPlayers, game.maxPlayer)} styleName="text-blue-600"/>
                 </div>
             </div>
             <div className="flex flex-col md:flex-row">
                 <div className="md:w-3/4 text-ellipsis whitespace-pre-line p-4 text-neutral-800">
-                    {quest.description}
+                    {game.description}
                 </div>
                 <div className="flex flex-col justify-content gap-4 md:w-1/4 p-4">
-                    <button type="submit" className="self-center w-1/2 md:w-3/4 mb-4 bg-slate-200 hover:bg-slate-300 h-16 md:h-12 rounded-md font-medium">
-                        Join
+                    <button type="submit" className="self-center w-1/2 md:w-3/4 bg-slate-200 hover:bg-slate-300 h-16 md:h-12 rounded-md font-medium">
+                        Find
                     </button>
                 </div>
             </div>
@@ -47,7 +44,17 @@ export default function QuestInfoListing({quest}: any) {
     );
 }
 
-const IconRow = function({ LinkIcon, content, styleName}: { LinkIcon: typeof PuzzlePieceIcon, content: string | null | undefined, styleName: string}) {
+function playersFormatted(minPlayers?: number, maxPlayer? : number) {
+    if(minPlayers && maxPlayer)
+        return `${minPlayers} – ${maxPlayer}`;
+    if(minPlayers)
+        return `${minPlayers}`;
+    if(maxPlayer)
+        return `${maxPlayer}`;
+    return `No Recommendation`;
+}
+
+function IconRow({ LinkIcon, content, styleName}: { LinkIcon: typeof ClockIcon, content: string | null | undefined, styleName: string}) {
     return (
         <div className={clsx(
         "flex items-center justify-start gap-2 m-0 md:text-lg",
@@ -59,21 +66,7 @@ const IconRow = function({ LinkIcon, content, styleName}: { LinkIcon: typeof Puz
     );
 };
 
-function dateSlicer(start: any, end: any) {
-    let ret = start.toString().replace(/T/, ' ').replace(/\..+/, '').slice(0, 16);
-    if(end)
-        ret += '-' + end.toString().slice(11, 16);
-    return ret;
-}
-
-function playerSlicer(current: any, max: any) {
-    let ret = current;
-    if(max)
-        ret += '/' + max;
-    return ret;
-}
-
-export function QuestInfoListingSkeleton() {
+export function GameInfoShowSkeleton() {
     return (
         <div className="flex flex-col z-40 bg-white w-5/6 md:w-2/3 overflow-y-auto">
             <div className="flex flex-col md:flex-row">
@@ -82,12 +75,8 @@ export function QuestInfoListingSkeleton() {
                 </div>
                 <div className="flex flex-col w-full md:w-2/3 md:h-full p-4 gap-4">
                     <div className="h-9 w-60 self-center animate-pulse rounded-md bg-slate-200"></div>
-                    <IconRowSkeleton LinkIcon={PuzzlePieceIcon} styleName="text-blue-800"/>
-                    <IconRowSkeleton LinkIcon={ClockIcon} styleName="text-blue-600"/>
-                    <IconRowSkeleton LinkIcon={BuildingStorefrontIcon} styleName="text-blue-400"/>
-                    <IconRowSkeleton LinkIcon={MapPinIcon} styleName="text-blue-400"/>
-                    <IconRowSkeleton LinkIcon={UserGroupIcon} styleName="text-neutral-800"/>
-                    <IconRowSkeleton LinkIcon={UserIcon} styleName="text-neutral-800"/>
+                    <IconRowSkeleton LinkIcon={ClockIcon} styleName="text-blue-800"/>
+                    <IconRowSkeleton LinkIcon={UserGroupIcon} styleName="text-blue-600"/>
                 </div>
             </div>
             <div className="flex flex-col md:flex-row">
@@ -107,7 +96,7 @@ export function QuestInfoListingSkeleton() {
     );
 }
 
-const IconRowSkeleton = function({ LinkIcon, styleName}: { LinkIcon: typeof PuzzlePieceIcon, styleName: string}) {
+const IconRowSkeleton = function({ LinkIcon, styleName}: { LinkIcon: typeof ClockIcon, styleName: string}) {
     return (
       <div className={clsx(
         "flex items-center justify-start gap-2 m-0 md:text-lg pr-3 md:pr-0",

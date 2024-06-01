@@ -3,11 +3,13 @@
 import { MainQuests } from "@/app/ui/main/quests/main-quests";
 import SearchDate from "@/app/ui/main/finder/search-date";
 import SearchGame from "@/app/ui/main/finder/search-game";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import OverLayer from "@/app/ui/main/overlayer";
 import QuestInfo from "@/app/ui/main/quests/quest-info";
+import { Quest } from "@/app/types/Quest";
 
 export default function Page() {
+    const [quests, setQuests] = useState<Quest[]>([]);
     const [date, setDate] = useState<Date>();
     const [game, setGame] = useState<string>();
 
@@ -17,8 +19,8 @@ export default function Page() {
                 <SearchDate setDate={setDate}/>
                 <SearchGame setGame={setGame}/>
             </div>
-            {date && <MainQuests date={date} game={game}/>}
-            <QuestInfo />
+            {date && <MainQuests quests={quests} setQuests={setQuests} date={date} game={game} />}
+            <QuestInfo quests={quests} setQuests={setQuests} />
         </div>
     );
 }

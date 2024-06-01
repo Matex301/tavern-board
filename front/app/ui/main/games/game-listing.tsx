@@ -1,18 +1,35 @@
+import Image from 'next/image';
+import clsx from 'clsx';
+import { Game } from '@/app/types/Game';
+import {useSearchParams, useRouter, usePathname} from "next/navigation";
 import {
   ClockIcon,
   UserGroupIcon
 } from '@heroicons/react/24/outline';
-import Image from 'next/image';
-import clsx from 'clsx';
-import { Game } from '@/app/types/Game';
 
 
-export default function GameListing({games}: any) {
+
+export default function GameListing({games}: {games: Game[]}) {
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+
+  function onClick(id: string)
+  {
+    if(!id)
+      return;
+
+    const update = new URLSearchParams(params.toString());
+    update.set('game', id);
+    router.replace(`${pathname}?${update}`, {scroll: false});
+  }
+
   return (
     <>
       {(games?.length !== 0) ? (
         games.map((game: Game) => (
-          <div className="flex w-full min-h-52 bg-slate-50 flex-col md:flex-row mb-4 hover:bg-slate-300" key={game['@id']}>
+          <div onClick={() => {onClick(game.id)}} className="flex w-full min-h-52 bg-slate-50 flex-col md:flex-row mb-4 hover:bg-slate-300" key={game['@id']}>
             <div className="flex flex-row gap-4 md:pr-4 grow">
               <div className="w-48 h-48 md:h-full relative">
                 <Image

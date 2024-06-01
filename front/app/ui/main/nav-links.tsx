@@ -4,6 +4,7 @@ import {
   MagnifyingGlassIcon,
   MapIcon,
   ClipboardDocumentCheckIcon,
+  PencilSquareIcon,
   BookOpenIcon
 } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
@@ -14,6 +15,7 @@ import clsx from 'clsx';
 
 const links = [
   { name: 'Find Quests', href: '/main', icon: MagnifyingGlassIcon, login: false },
+  { name: 'Add Quests', href: '/main/addQuest', icon: PencilSquareIcon, login: true },
   { name: 'Tavern Map', href: '/main/map', icon: MapIcon, login: false },
   { name: 'Accepted Quests', href: '/main/history', icon: ClipboardDocumentCheckIcon, login: true },
   { name: 'Game Library', href: '/main/games', icon: BookOpenIcon, login: false }

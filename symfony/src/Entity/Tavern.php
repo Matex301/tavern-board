@@ -19,17 +19,24 @@ use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Serializer\Attribute\SerializedName;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\State\TavernPostProcessor;
 
 #[ApiResource(
     operations: [
         new GetCollection(),
-        new Post(security: "is_granted('ROLE_ADMIN')", validationContext: ['groups' => ['tavern:create']]),
+        new Post(security: "is_granted('ROLE_ADMIN')", validationContext: ['groups' => ['tavern:create']], processor: TavernPostProcessor::class),
         new Get(),
         new Patch(security: "is_granted('ROLE_ADMIN')"),
         new Delete(security: "is_granted('ROLE_ADMIN')"),
+        new GetCollection(
+            uriTemplate: '/list/taverns',
+            paginationEnabled: false,
+            normalizationContext: ['groups' => ['tavern:list']],
+        ),
     ],
     normalizationContext: ['groups' => ['tavern:read']],
     denormalizationContext: ['groups' => ['tavern:create', 'tavern:update']],
+    securityMessage: "Access Denied"
 )]
 #[ORM\Entity(repositoryClass: TavernRepository::class)]
 class Tavern
@@ -38,13 +45,13 @@ class Tavern
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    #[Groups(['tavern:read'])]
+    #[Groups(['tavern:read', 'tavern:list', 'quest:read', 'quest:collection'])]
     private ?Uuid $id = null;
 
     #[ORM\Column(length: 255, nullable: false)]
-    #[Assert\NotBlank]
+    #[Assert\NotBlank(groups: ['tavern:create'])]
     #[Assert\Length(min: 6, max: 255)]
-    #[Groups(['tavern:read', 'tavern:create', 'tavern:update', 'quest:read'])]
+    #[Groups(['tavern:read', 'tavern:create', 'tavern:update', 'tavern:list', 'quest:read', 'quest:collection'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -59,7 +66,7 @@ class Tavern
     private Collection $quests;
 
     #[ORM\Embedded(class: Address::class)]
-    #[Groups(['tavern:read', 'tavern:create', 'tavern:update', 'quest:read'])]
+    #[Groups(['tavern:read', 'tavern:create', 'tavern:update', 'tavern:list', 'quest:read', 'quest:collection'])]
     #[ApiProperty(genId: false)]
     private Address $address;
 

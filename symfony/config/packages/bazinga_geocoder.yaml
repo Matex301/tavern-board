@@ -1,0 +1,7 @@
+# See the docs at https://github.com/geocoder-php/BazingaGeocoderBundle
+bazinga_geocoder:
+    providers:
+        acme:
+            factory: Bazinga\GeocoderBundle\ProviderFactory\GoogleMapsFactory
+            options:
+                api_key: '%env(GOOGLE_API_KEY)%'

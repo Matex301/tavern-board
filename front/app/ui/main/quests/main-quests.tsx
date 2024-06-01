@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import Spinner from "@/app/ui/main/spinner";
 import { fetchQuests } from "@/app/api-actions/quests";
@@ -8,9 +8,8 @@ import QuestListing, { QuestListingSkeleton } from "@/app/ui/main/quests/quest-l
 import { Quest } from "@/app/types/Quest";
 import clsx from "clsx";
 
-export function MainQuests({date, game}: {date: Date | undefined, game: string | undefined}) {
+export function MainQuests({quests, setQuests, date, game}: {quests: Quest[], setQuests: Dispatch<SetStateAction<Quest[]>>, date: Date | undefined, game: string | undefined}) {
   const { ref, inView } = useInView({delay: 1000});
-  const [quests, setQuests] = useState<Quest[]>([]);
   const [end, setEnd] = useState(false);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);

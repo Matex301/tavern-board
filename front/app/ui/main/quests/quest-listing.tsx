@@ -1,14 +1,15 @@
-
 import Image from 'next/image';
 import clsx from 'clsx';
+import {useSearchParams, useRouter, usePathname} from "next/navigation";
+import { Quest } from '@/app/types/Quest';
+import Link from "next/link";
+import dateFormatted from './date-formatted';
 import {
   PuzzlePieceIcon,
   ClockIcon,
   MapPinIcon
 } from '@heroicons/react/24/outline';
-import {useSearchParams, useRouter, usePathname} from "next/navigation";
-import { Quest } from '@/app/types/Quest';
-import Link from "next/link";
+
 
 export default function QuestListing({quests}: any) {
 
@@ -16,14 +17,14 @@ export default function QuestListing({quests}: any) {
   const pathname = usePathname();
   const params = useSearchParams();
 
-  function onClick(id: string | undefined)
+  function onClick(id: string)
   {
     if(!id)
       return;
 
     const update = new URLSearchParams(params.toString());
     update.set('quest', id);
-    router.replace(`${pathname}?${update}`);
+    router.replace(`${pathname}?${update}`, {scroll: false});
   }
 
   return (
@@ -42,7 +43,7 @@ export default function QuestListing({quests}: any) {
               </div>
                 <div className="flex flex-col justify-center gap-5">
                   <IconRow LinkIcon={PuzzlePieceIcon} content={quest.game.name} styleName="text-blue-800"/>
-                  <IconRow LinkIcon={ClockIcon} content={dateSlicer(quest.startAt, quest.endAt)} styleName="text-blue-600"/>
+                  <IconRow LinkIcon={ClockIcon} content={dateFormatted(quest.startAt, quest.endAt)} styleName="text-blue-600"/>
                   <IconRow LinkIcon={MapPinIcon} content={quest.tavern.address.street + ', ' + quest.tavern.address.city} styleName="text-blue-400"/>
                 </div>
               </div>
@@ -74,13 +75,6 @@ const IconRow = function({ LinkIcon, content, styleName}: { LinkIcon: typeof Puz
     </div>
   );
 };
-
-function dateSlicer(start: any, end: any) {
-  let ret = start.toString().replace(/T/, ' ').replace(/\..+/, '').slice(0, 16);
-  if(end)
-    ret += '-' + end.toString().slice(11, 16);
-  return ret;
-}
 
 export function QuestListingSkeleton() {
   let arr: Array<number> = [1,2,3];

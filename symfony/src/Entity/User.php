@@ -29,7 +29,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
         new GetCollection(),
         new Post(validationContext: ['groups' => ['user:create']], processor: UserRegistrationProcessor::class),
         new Get(),
-        new Patch(security: "is_granted('ROLE_ADMIN') or (object == user)", processor: UserPasswordHasherProcessor::class),
+        new Patch(denormalizationContext: ['groups' => ['user:create']], security: "is_granted('ROLE_ADMIN') or (object == user)", processor: UserPasswordHasherProcessor::class),
         new Delete(security: "is_granted('ROLE_ADMIN') or (object == user)"),
         new GetCollection(
             uriTemplate: "/quests/{id}/players",
@@ -45,7 +45,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
         ),
     ],
     normalizationContext: ['groups' => ['user:read']],
-    denormalizationContext: ['groups' => ['user:create', 'user:update']],
+    denormalizationContext: ['groups' => ['user:update']],
+    securityMessage: "Access Denied"
 )]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\HasLifecycleCallbacks]
@@ -61,7 +62,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'quest:read'])]
     private ?Uuid $id = null;
 
     #[ORM\Column( type: 'string', length: 180, unique: true, nullable: false)]

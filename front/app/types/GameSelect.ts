@@ -1,7 +1,7 @@
 import { Item } from "./item";
 
-export class GameName implements Item {
-  public "@id"?: string;
+export class GameSelect implements Item {
+  public "@id": string;
 
   constructor(
     _id: string,

@@ -13,9 +13,11 @@
         "doctrine/doctrine-bundle": "^2.12",
         "doctrine/doctrine-migrations-bundle": "^3.3",
         "doctrine/orm": "^3.1",
+        "geocoder-php/google-maps-provider": "*",
         "lexik/jwt-authentication-bundle": "^2.20",
         "nelmio/api-doc-bundle": "^4.25",
         "nelmio/cors-bundle": "^2.4",
+        "nyholm/psr7": "^1.8",
         "phpdocumentor/reflection-docblock": "^5.4",
         "phpstan/phpdoc-parser": "^1.28",
         "symfony/amqp-messenger": "7.0.*",
@@ -26,6 +28,7 @@
         "symfony/flex": "^2",
         "symfony/form": "7.0.*",
         "symfony/framework-bundle": "7.0.*",
+        "symfony/http-client": "*",
         "symfony/mailer": "7.0.*",
         "symfony/messenger": "7.0.*",
         "symfony/property-access": "7.0.*",
@@ -37,7 +40,8 @@
         "symfony/uid": "7.0.*",
         "symfony/validator": "7.0.*",
         "symfony/yaml": "7.0.*",
-        "symfonycasts/verify-email-bundle": "^1.17"
+        "symfonycasts/verify-email-bundle": "^1.17",
+        "willdurand/geocoder-bundle": "^5.20"
     },
     "config": {
         "allow-plugins": {

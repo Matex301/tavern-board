@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Attribute\Ignore;
 
@@ -10,16 +11,27 @@ use Symfony\Component\Serializer\Attribute\Ignore;
 class Address
 {
     #[ORM\Column(length: 80, nullable: false)]
-    #[Groups(['tavern:read', 'tavern:create', 'tavern:update', 'quest:read'])]
+    #[Assert\NotBlank(groups: ['tavern:create'])]
+    #[Groups(['tavern:read', 'tavern:create', 'tavern:update', 'tavern:list', 'quest:read', 'quest:collection'])]
     private string $street;
 
     #[ORM\Column(length: 80, nullable: false)]
-    #[Groups(['tavern:read', 'tavern:create', 'tavern:update', 'quest:read'])]
+    #[Assert\NotBlank(groups: ['tavern:create'])]
+    #[Groups(['tavern:read', 'tavern:create', 'tavern:update', 'tavern:list', 'quest:read', 'quest:collection'])]
     private string $city;
 
     #[ORM\Column(length: 80, nullable: false)]
-    #[Groups(['tavern:read', 'tavern:create', 'tavern:update', 'quest:read'])]
+    #[Assert\NotBlank(groups: ['tavern:create'])]
+    #[Groups(['tavern:read', 'tavern:create', 'tavern:update', 'tavern:list', 'quest:read', 'quest:collection'])]
     private string $country;
+
+    #[ORM\Column(nullable: false)]
+    #[Groups(['tavern:read', 'tavern:list'])]
+    private float $latitude;
+
+    #[ORM\Column(nullable: false)]
+    #[Groups(['tavern:read', 'tavern:list'])]
+    private float $longitude;
 
     public function __construct(string $country, string $city, string $street) {
         $this->country = $country;
@@ -56,6 +68,27 @@ class Address
     {
         $this->country = $country;
     }
+
+    public function getLatitude(): float
+    {
+        return $this->latitude;
+    }
+
+    public function setLatitude(float $latitude): void
+    {
+        $this->latitude = $latitude;
+    }
+
+    public function getLongitude(): float
+    {
+        return $this->longitude;
+    }
+
+    public function setLongitude(float $longitude): void
+    {
+        $this->longitude = $longitude;
+    }
+
 /*
     public function __toString(): string
     {

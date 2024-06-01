@@ -5,9 +5,12 @@ namespace App\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\HttpFoundation\Response;
 use App\Entity\Quest;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[AsController]
 class QuestJoinController extends AbstractController
@@ -18,7 +21,7 @@ class QuestJoinController extends AbstractController
     ) {
     }
 
-    public function __invoke(Quest $quest): Response
+    public function __invoke(Quest $quest, SerializerInterface $serializer): JsonResponse|Response
     {
         $user = $this->security->getUser();
         if (!$user) {
@@ -33,6 +36,8 @@ class QuestJoinController extends AbstractController
         $this->entityManager->persist($quest);
         $this->entityManager->flush();
 
-        return new Response(null, Response::HTTP_OK);
+        return new JsonResponse($serializer->serialize($quest, 'json', [
+            'groups' => ['quest:read']
+        ]), Response::HTTP_OK, [], true);
     }
 }

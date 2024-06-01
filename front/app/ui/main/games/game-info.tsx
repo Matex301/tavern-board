@@ -4,31 +4,31 @@ import {useSearchParams, useRouter, usePathname} from "next/navigation";
 import { Transition } from '@headlessui/react'
 import { useEffect, useState, Dispatch } from "react";
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { Quest } from "@/app/types/Quest";
-import { fetchQuest } from "@/app/api-actions/quests";
-import QuestInfoShow, { QuestInfoShowSkeleton } from "@/app/ui/main/quests/quest-info-show";
+import { Game } from "@/app/types/Game";
+import { fetchGame } from "@/app/api-actions/games";
+import GameInfoShow, { GameInfoShowSkeleton } from "@/app/ui/main/games/game-info-show";
 import QuestInfoEdit from "@/app/ui/main/quests/quest-info-edit";
 
-export default function QuestInfo({quests, setQuests}: {quests: Quest[], setQuests: Dispatch<Quest[]>}) {
+export default function GameInfo({games, setGames}: {games: Game[], setGames: Dispatch<Game[]>}) {
     const router = useRouter();
     const pathname = usePathname();
     const params = useSearchParams();
     const [show, setShow] = useState(false);
-    const [quest, setQuest] = useState<Quest>();
+    const [game, setGame] = useState<Game>();
     const [loading, setLoading] = useState(false);
 
     function close() {
         const update = new URLSearchParams(params.toString());
-        update.delete('quest');
+        update.delete('game');
         router.replace(`${pathname}?${update}`, {scroll: false});
     }
 
     const load = async (signal: AbortSignal, id: string) => {
-        const loaded = await fetchQuest(signal, id);
+        const loaded = await fetchGame(signal, id);
 
         setLoading(false);
         if(loaded)
-            setQuest(loaded);
+            setGame(loaded);
     }
 
     const controller = new AbortController();
@@ -36,13 +36,13 @@ export default function QuestInfo({quests, setQuests}: {quests: Quest[], setQues
 
     function cleanup() {
         setShow(false);
-        setQuest(undefined);
+        setGame(undefined);
         controller.abort();
-        console.log('Quest Info Cleanup');
+        console.log('Game Info Cleanup');
     }
 
     useEffect(() => {
-        const id = params.get("quest");
+        const id = params.get("game");
 
         if(!id)
             return;
@@ -73,12 +73,10 @@ export default function QuestInfo({quests, setQuests}: {quests: Quest[], setQues
                 className="fixed left-0 top-0 w-full h-full bg-black bg-opacity-50 z-20 backdrop-blur flex justify-center items-center"
             >
                 <ExitButton />
-                {quest && (
-                    quest.isEditable() ?
-                        <QuestInfoEdit quests={quests} setQuests={setQuests} quest={quest} setQuest={setQuest} /> :
-                        <QuestInfoShow quest={quest} setQuest={setQuest} />
+                {game && (
+                    <GameInfoShow game={game} />
                 )}
-                {loading && <QuestInfoShowSkeleton />}
+                {loading && <GameInfoShowSkeleton />}
                 <div
                     className="fixed left-0 top-0 w-full h-full z-30"
                     onClick={close}
@@ -87,6 +85,12 @@ export default function QuestInfo({quests, setQuests}: {quests: Quest[], setQues
         </Transition>
     );
 }
+
+/*
+                    game.isEditable() ?
+                        <QuestInfoEdit quests={quests} setQuests={setQuests} quest={quest} setQuest={setQuest} /> :
+                        <QuestInfoShow quest={quest} />
+*/
 
 function ExitButton() {
     const router = useRouter();

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import Spinner from "@/app/ui/main/spinner";
-import { fetchQuestJoined, fetchQuests } from "@/app/api-actions/quests";
+import { fetchQuestJoined } from "@/app/api-actions/quests";
 import QuestListing, { QuestListingSkeleton } from "@/app/ui/main/quests/quest-listing";
 import { Quest } from "@/app/types/Quest";
 import clsx from "clsx";

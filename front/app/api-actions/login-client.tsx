@@ -58,6 +58,23 @@ export function getUserId() {
     return parse?.id;
 }
 
+export function hasRole(role: string) {
+    const token = localStorage.getItem('Authorization');
+    if(!token) {
+        return null;
+    }
+    
+    const parse = parseJwt(token);
+    //console.log('exp:' + parse.exp * 1000);
+    //console.log('now:' + (new Date()).getTime());
+    if((parse.exp * 1000) < (new Date()).getTime()) {
+        deleteJWT();
+        return null;
+    }
+
+    return parse?.roles.includes(role);
+}
+
 export function getJWT() {
     return localStorage.getItem('Authorization');
 }
@@ -65,7 +82,7 @@ export function getJWT() {
 interface JWTpayload {
     iat: number,
     exp: number,
-    roles: [],
+    roles: Array<string>,
     id: string
 }
 

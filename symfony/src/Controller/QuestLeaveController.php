@@ -6,8 +6,10 @@ use App\Entity\Quest;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[AsController]
 class QuestLeaveController extends AbstractController
@@ -18,7 +20,7 @@ class QuestLeaveController extends AbstractController
     ) {
     }
 
-    public function __invoke(Quest $quest): Response
+    public function __invoke(Quest $quest, SerializerInterface $serializer): JsonResponse|Response
     {
         $user = $this->security->getUser();
         if (!$user) {
@@ -33,6 +35,8 @@ class QuestLeaveController extends AbstractController
         $this->entityManager->persist($quest);
         $this->entityManager->flush();
 
-        return new Response(null, Response::HTTP_OK);
+        return new JsonResponse($serializer->serialize($quest, 'json', [
+            'groups' => ['quest:read']
+        ]), Response::HTTP_OK, [], true);
     }
 }

@@ -16,8 +16,6 @@ export function LoadGames() {
   const [loading, setLoading] = useState(false);
 
   const load = async (signal: AbortSignal) => {
-    //console.log("Page: ", page);
-
     const hydra = await fetchGames(signal, page);
     setLoading(false);
     if(!hydra)

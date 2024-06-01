@@ -5,20 +5,20 @@ import { Combobox, Transition } from '@headlessui/react'
 import {useSearchParams, useRouter, usePathname} from "next/navigation";
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 import { PuzzlePieceIcon } from '@heroicons/react/24/outline';
-import { fetchGamesName } from '@/app/api-actions/games';
-import { GameName } from '@/app/types/GameName';
+import { fetchGamesList } from '@/app/api-actions/games';
+import { GameSelect } from '@/app/types/GameSelect';
 import { useDebouncedCallback } from 'use-debounce';
 
 export default function SearchGame({setGame}: {setGame: Dispatch<string|undefined>}) {
     const router = useRouter();
     const pathname = usePathname();
     const params = useSearchParams();
-    const [selected, setSelected] = useState<GameName|null>(null);
-    const [games, setGames] = useState<GameName[]>([]);
+    const [selected, setSelected] = useState<GameSelect|null>(null);
+    const [games, setGames] = useState<GameSelect[]>([]);
     const [query, setQuery] = useState('');
 
     const load = async (signal: AbortSignal) => {
-        const hydra = await fetchGamesName(signal);
+        const hydra = await fetchGamesList(signal);
         if(!hydra)
             return;
 
@@ -58,30 +58,12 @@ export default function SearchGame({setGame}: {setGame: Dispatch<string|undefine
         once = true;
     }, []);
 
-    function onChange(value: GameName) {
-
-        if(value?.id == params.get('game'))
-            return;
-
-        console.log(value);
-
-        const update = new URLSearchParams(params.toString());
-        if(value?.id) {
-            update.set('game', value?.id);
-        } else {
-            update.delete('game');
-        }
-        router.replace(`${pathname}?${update}`);
-        setSelected(value);
-        setGame(value?.id);
-    }
-
     const debounced = useDebouncedCallback(
-        (value: GameName) => {
+        (value: GameSelect) => {
             if(value?.id == params.get('game'))
                 return;
     
-            console.log(value);
+            //console.log(value);
     
             const update = new URLSearchParams(params.toString());
             if(value?.id) {
@@ -89,7 +71,7 @@ export default function SearchGame({setGame}: {setGame: Dispatch<string|undefine
             } else {
                 update.delete('game');
             }
-            router.replace(`${pathname}?${update}`);
+            router.replace(`${pathname}?${update}`, {scroll: false});
             setSelected(value);
             setGame(value?.id);
         },
@@ -111,7 +93,7 @@ export default function SearchGame({setGame}: {setGame: Dispatch<string|undefine
                     <div className="flex flex-row justify-center items-center gap-1 p-1 relative w-full h-full cursor-default overflow-hidden rounded-md bg-blue-600 text-lg text-center focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
                     <Combobox.Input
                         className="w-full h-full border-none py-1 text-lg text-center focus:ring-0 rounded-md placeholder:text-gray-500"
-                        displayValue={(game: GameName) => game?.name}
+                        displayValue={(game: GameSelect) => game?.name}
                         onChange={(event) => setQuery(event.target.value)}
                         placeholder='Search Game'
                     />

@@ -33,17 +33,17 @@ use App\Controller\QuestJoinController;
 
 #[ApiResource(
     operations: [
-        new GetCollection(),
-        new Post(security: "is_granted('ROLE_USER')", validationContext: ['groups' => ['quest:create']], processor: QuestRegistrationProcessor::class),
+        new GetCollection(normalizationContext: ['groups' => ['quest:collection']]),
+        new Post(denormalizationContext: ['groups' => ['quest:create']], security: "is_granted('ROLE_USER')", validationContext: ['groups' => ['quest:create']], processor: QuestRegistrationProcessor::class,),
         new Get(),
-        new Patch(security: "is_granted('ROLE_ADMIN') or (object.creator == user)"),
-        new Delete(security: "is_granted('ROLE_ADMIN') or (object.creator == user)"),
-        new Post(
+        new Patch(security: "is_granted('ROLE_ADMIN') or (object.getCreator() == user)"),
+        new Delete(security: "is_granted('ROLE_ADMIN') or (object.getCreator() == user)"),
+        new Get(
             uriTemplate: "/quests/{id}/join",
             controller: QuestJoinController::class,
             openapi: new Model\Operation(
                 responses: [
-                    '201' => [
+                    '200' => [
                         'schema' => [],
                         'example' => [],
                         'description' => "User added as a participant"
@@ -59,7 +59,6 @@ use App\Controller\QuestJoinController;
                         ]
                     ])
                 )
-
             ),
             security: "is_granted('ROLE_USER')",
         ),
@@ -68,7 +67,7 @@ use App\Controller\QuestJoinController;
             controller: QuestLeaveController::class,
             openapi: new Model\Operation(
                 responses: [
-                    '201' => [
+                    '200' => [
                         'schema' => [],
                         'example' => [],
                         'description' => "User removed or was never a participant"
@@ -84,7 +83,6 @@ use App\Controller\QuestJoinController;
                         ]
                     ])
                 )
-
             ),
             security: "is_granted('ROLE_USER')",
         ),
@@ -96,6 +94,7 @@ use App\Controller\QuestJoinController;
                     fromClass: User::class,
                 )
             ],
+            normalizationContext: ['groups' => ['quest:collection']],
             security: 'is_granted("ROLE_ADMIN") or is_granted("USER_ID", object)'
         ),
         new GetCollection(
@@ -106,21 +105,14 @@ use App\Controller\QuestJoinController;
                     fromClass: User::class,
                 )
             ],
+            normalizationContext: ['groups' => ['quest:collection']],
             security: 'is_granted("ROLE_ADMIN") or is_granted("USER_ID", object)'
-        ),
-        new GetCollection(
-            uriTemplate: '/games/{id}/quests',
-            uriVariables: [
-                'id' => new Link(
-                    fromProperty: 'quests',
-                    fromClass: Game::class,
-                )
-            ]
         ),
     ],
     normalizationContext: ['groups' => ['quest:read']],
-    denormalizationContext: ['groups' => ['quest:create', 'quest:update']],
-    order: ['startAt' => 'ASC']
+    denormalizationContext: ['groups' => ['quest:update']],
+    order: ['startAt' => 'ASC'],
+    securityMessage: "Access Denied"
 )]
 #[ORM\Entity(repositoryClass: QuestRepository::class)]
 #[ApiFilter(SearchFilter::class, properties: ['game' => 'exact'])]
@@ -131,21 +123,21 @@ class Quest
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(class: 'doctrine.uuid_generator')]
-    #[Groups(['quest:read'])]
+    #[Groups(['quest:read', 'quest:collection'])]
     private ?Uuid $id = null;
 
     #[ORM\Column(length: 255, nullable: false)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 6, max: 255)]
-    #[Groups(['quest:read', 'quest:create', 'quest:update'])]
+    #[Groups(['quest:read', 'quest:collection', 'quest:create', 'quest:update'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Groups(['quest:read', 'quest:create', 'quest:update'])]
+    #[Groups(['quest:read', 'quest:collection', 'quest:create', 'quest:update'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['quest:read', 'quest:create', 'quest:update'])]
+    #[Groups(['quest:read', 'quest:collection', 'quest:create', 'quest:update'])]
     private ?string $image = null;
 
     #[ORM\ManyToOne(inversedBy: 'createdQuests')]
@@ -166,30 +158,31 @@ class Quest
 
     #[ORM\Column(nullable: false)]
     #[Assert\NotBlank]
-    #[Groups(['quest:read', 'quest:create', 'quest:update'])]
+    #[Groups(['quest:read', 'quest:collection', 'quest:create', 'quest:update'])]
     #[ApiFilter(DateFilter::class)]
     #[ApiFilter(OrderFilter::class)]
     private ?\DateTimeImmutable $startAt = null;
 
     #[ORM\Column(nullable: true)]
-    #[Groups(['quest:read', 'quest:create', 'quest:update'])]
+    #[Groups(['quest:read', 'quest:collection', 'quest:create', 'quest:update'])]
     private ?\DateTimeImmutable $endAt = null;
 
     #[ORM\ManyToOne(inversedBy: 'quests')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotBlank]
-    #[Groups(['quest:read', 'quest:create'])]
+    #[Groups(['quest:read', 'quest:collection', 'quest:create'])]
     #[ApiProperty(openapiContext: ['example' => '/api/games/018ed86e-46ed-75a3-90ec-5c62c045cc20'])]
     private ?Game $game = null;
 
     #[ORM\ManyToOne(inversedBy: 'quests')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotBlank]
-    #[Groups(['quest:read', 'quest:create'])]
+    #[Groups(['quest:read', 'quest:collection', 'quest:create', 'quest:update'])]
     #[ApiProperty(openapiContext: ['example' => '/api/taverns/018ed86d-e18d-7552-9aeb-5ec34042a5d2'])]
     private ?Tavern $tavern = null;
 
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'joinedQuests')]
+    #[Groups(['quest:read'])]
     private Collection $players;
 
     public function __construct()
@@ -238,12 +231,12 @@ class Quest
         return $this;
     }
 
-    public function getCreator(): ?User
+    public function getCreator(): User
     {
         return $this->creator;
     }
 
-    public function setCreator(?User $creator): static
+    public function setCreator(User $creator): static
     {
         $this->creator = $creator;
 
