@@ -3,12 +3,12 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import Spinner from "@/app/ui/main/spinner";
-import { fetchQuestJoined } from "@/app/api-actions/quests";
+import { fetchQuestCreated } from "@/app/api-actions/quests";
 import QuestListing, { QuestListingSkeleton } from "@/app/ui/main/quests/quest-listing";
 import { Quest } from "@/app/types/Quest";
 import clsx from "clsx";
 
-export function JoinedQuests({quests, setQuests, date, game, tavern}: {quests: Quest[], setQuests: Dispatch<SetStateAction<Quest[]>>, date: Date | undefined, game: string | undefined, tavern: string | undefined}) {
+export function CreatedQuests({quests, setQuests, date, game, tavern}: {quests: Quest[], setQuests: Dispatch<SetStateAction<Quest[]>>, date: Date | undefined, game: string | undefined, tavern: string | undefined}) {
   const { ref, inView } = useInView({delay: 1000});
   const [end, setEnd] = useState(false);
   const [page, setPage] = useState(1);
@@ -16,7 +16,7 @@ export function JoinedQuests({quests, setQuests, date, game, tavern}: {quests: Q
 
   const load = async (signal: AbortSignal) => {
 
-    const hydra = await fetchQuestJoined(signal, page, date, game, tavern);
+    const hydra = await fetchQuestCreated(signal, page, date, game, tavern);
     setLoading(false);
     if(!hydra)
       return;

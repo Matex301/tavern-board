@@ -23,7 +23,7 @@ export default function QuestCreate() {
     const [title, setTitle] = useState<string>('');
     const [startAt, setStartAt] = useState<Date>(new Date());
     const [endAt, setEndAt] = useState<Date>();
-    const [tavern, setTavern] = useState<TavernSelect>(new TavernSelect('', '', '', {street: 'Street', city: 'City', country: 'Country'}));
+    const [tavern, setTavern] = useState<TavernSelect>(new TavernSelect('', '', '', {street: 'Street', city: 'City', country: 'Country', latitude: 0, longitude: 0}));
     const [game, setGame] = useState<GameSelect>(new GameSelect('', '', ''));
     const [maxPlayers, setMaxPlayers] = useState<number>();
     const [description, setDescription] = useState<string>('');
@@ -81,7 +81,7 @@ export default function QuestCreate() {
         <form className="flex flex-col w-full justify-center p-4 gap-4 bg-slate-50">
 
             <textarea
-                className="md:w-1/2 text-2xl font-bold text-center placeholder:text-gray-500"
+                className="md:w-1/2 text-2xl font-bold self-center text-center placeholder:text-gray-500"
                 spellCheck={false}
                 value={title}
                 onChange={(obj: any) => {setTitle(obj.target.value)}}

@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import clsx from 'clsx';
+import IconRow from '../icon-row';
 import TavernCombobox from './edit/tavern-combobox';
 import DateSelect from './edit/date-select';
 import { Dispatch, MouseEventHandler } from 'react';
@@ -134,18 +134,6 @@ export default function QuestInfoEdit({quests, setQuests, quest, setQuest}: {que
         </div>
     );
 }
-
-function IconRow({ LinkIcon, content, styleName}: { LinkIcon: typeof PuzzlePieceIcon, content: string | null | undefined, styleName: string}) {
-    return (
-        <div className={clsx(
-        "flex items-center justify-start gap-2 m-0 md:text-lg",
-        styleName
-        )}>
-        <LinkIcon className="size-6" />
-        <p className="flex items-center justify-start">{content}</p>
-        </div>
-    );
-};
 
 function playerSlicer(current: any, max: any) {
     let ret = current;

@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import clsx from 'clsx';
 import { Game } from '@/app/types/Game';
+import IconRow, { IconRowSkeleton } from '../icon-row';
 import {useSearchParams, useRouter, usePathname} from "next/navigation";
 import {
   ClockIcon,
@@ -60,30 +61,6 @@ export default function GameListing({games}: {games: Game[]}) {
     </>
   );
 }
-
-const IconRow = function({ LinkIcon, content, styleName}: { LinkIcon: typeof ClockIcon, content: string, styleName: string}) {
-  return (
-    <div className={clsx(
-      "flex items-center justify-start gap-2 m-0 md:text-lg",
-      styleName
-    )}>
-      <LinkIcon className="size-6" />
-      <p className="flex items-center justify-start">{content}</p>
-    </div>
-  );
-};
-
-const IconRowSkeleton = function({ LinkIcon, styleName}: { LinkIcon: typeof ClockIcon, styleName: string}) {
-  return (
-    <div className={clsx(
-      "flex items-center justify-start gap-2 m-0 md:text-lg pr-3 md:pr-0",
-      styleName
-    )}>
-      <LinkIcon className="size-6" />
-      <p className="flex items-center justify-start h-6 w-32 md:w-48 animate-pulse rounded-md bg-slate-200"></p>
-    </div>
-  );
-};
 
 export function GameListingSkeleton() {
   let arr: Array<number> = [1,2,3];

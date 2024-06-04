@@ -39,8 +39,6 @@ export default function SearchDate({setDate}: {setDate: Dispatch<Date>}) {
         (value: any) => {
             let dateString = value.toISOString();
 
-            console.log(dateString);
-    
             if(dateString == params.get('date'))
                 return;
     
@@ -57,7 +55,7 @@ export default function SearchDate({setDate}: {setDate: Dispatch<Date>}) {
     }
 
     return (
-        <div className="flex justify-center bg-blue-400 md:w-1/2 rounded-lg">
+        <div className="flex justify-center bg-blue-600 md:w-1/2 rounded-lg">
             <div className="flex flex-row justify-center items-center gap-1 p-1 relative">
                 <Datetime 
                     inputProps={inputProps}

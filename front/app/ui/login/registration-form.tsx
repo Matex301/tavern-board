@@ -1,7 +1,7 @@
 "use client"
 
 import { Dispatch, FormEvent, SetStateAction, useState } from 'react';
-import { UserIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import { UserIcon, LockClosedIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import Spinner from './spinner';
 import { useRouter } from 'next/navigation';
 import { createUser } from '@/app/api-actions/registration';
@@ -87,7 +87,7 @@ function UsernameInput() {
 function EmailInput() {
     return (
         <div className='relative flex flex-shrink-0 w-3/5'>
-            <LockClosedIcon className="absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900"/>
+            <EnvelopeIcon className="absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900"/>
             <input
                 type="email"
                 name="email"

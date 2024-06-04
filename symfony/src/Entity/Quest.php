@@ -115,7 +115,7 @@ use App\Controller\QuestJoinController;
     securityMessage: "Access Denied"
 )]
 #[ORM\Entity(repositoryClass: QuestRepository::class)]
-#[ApiFilter(SearchFilter::class, properties: ['game' => 'exact'])]
+#[ApiFilter(SearchFilter::class, properties: ['game' => 'exact', 'tavern' => 'exact'])]
 #[ORM\HasLifecycleCallbacks]
 class Quest
 {

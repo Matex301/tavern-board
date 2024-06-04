@@ -1,15 +1,23 @@
 "use client"
-import React, { useState } from 'react'
+
+import React, { Dispatch, useState } from 'react'
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
+import { TavernSelect } from '@/app/types/TavernSelect';
+import { Address } from '@/app/types/Tavern';
+import { Tavern } from '@/app/types/Tavern';
+import { useDebouncedCallback } from 'use-debounce';
+import { fetchTavernsListMap } from '@/app/api-actions/taverns';
+import Spinner from '../spinner';
 
 const center = {
   lat: 50.049683,
   lng: 19.944544
 };
 
-function Map() {
+function Map({setTavernSelect}: {setTavernSelect: Dispatch<TavernSelect>}) {
   const [map, setMap] = useState<google.maps.Map|null>(null)
-  const [markers, setMarker] = useState([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [markers, setMarkers] = useState<TavernSelect[]>([]);
 
   function onLoad(map: google.maps.Map) {
     setMap(map);
@@ -19,26 +27,73 @@ function Map() {
     setMap(null);
   }
 
-  function onIdle() {
-    console.log(map?.getBounds());
+  const controller = new AbortController();
+  const signal = controller.signal;
+
+  const onIdle = useDebouncedCallback(
+    () => {
+      if(!map)
+        return;
+
+      const bounds = map.getBounds();
+      if(!bounds)
+        return;
+
+      const northEast = bounds.getNorthEast();
+      const southWest = bounds.getSouthWest();
+      setLoading(true);
+      fetchTavernsListMap(signal, northEast.lat(), northEast.lng(), southWest.lat(), southWest.lng()).then(response => {
+        if(!response)
+          return;
+
+        if(!response['hydra:member'])
+          return;
+
+        let markers: TavernSelect[] = [];
+        response['hydra:member'].forEach((tavernSelect) => {
+          markers.push(tavernSelect);
+        })
+
+        setMarkers(markers);
+        setLoading(false);
+      });
+    },
+    1700
+  )
+
+  function onClick(tavern: TavernSelect) {
+    console.log('Marker onClick');
+    setTavernSelect(tavern);
   }
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: ""
+    googleMapsApiKey: ''
   })
 
   return isLoaded ? (
       <GoogleMap
-        mapContainerClassName='h-2/3 md:h-full w-full'
+        mapContainerClassName='grow md:h-full w-full'
         center={center}
         zoom={14}
         onLoad={onLoad}
         onUnmount={onUnmount}
         onIdle={onIdle}
       >
-        { /* Child components, such as markers, info windows, etc. */ <Marker onClick={() => {console.log('Marker Click')}} position={{lat: 50.049683, lng: 19.944544}} /> }
-        <></>
+        {loading &&
+          <div className='absolute left-[50%] top-[15%] w-fit'>
+            <Spinner />
+          </div>
+        }
+
+
+        {markers.map((marker: TavernSelect) => (
+          <Marker
+            key={marker.id}
+            position={{lat: marker.address.latitude, lng: marker.address.longitude}}
+            onClick={() => {onClick(marker)}}
+          />
+        ))}
       </GoogleMap>
   ) : <></>
 }

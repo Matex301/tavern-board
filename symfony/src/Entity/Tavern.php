@@ -32,6 +32,7 @@ use App\State\TavernPostProcessor;
             uriTemplate: '/list/taverns',
             paginationEnabled: false,
             normalizationContext: ['groups' => ['tavern:list']],
+            filters: ['tavern.range_filter']
         ),
     ],
     normalizationContext: ['groups' => ['tavern:read']],

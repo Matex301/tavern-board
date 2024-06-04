@@ -7,7 +7,6 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { Game } from "@/app/types/Game";
 import { fetchGame } from "@/app/api-actions/games";
 import GameInfoShow, { GameInfoShowSkeleton } from "@/app/ui/main/games/game-info-show";
-import QuestInfoEdit from "@/app/ui/main/quests/quest-info-edit";
 
 export default function GameInfo({games, setGames}: {games: Game[], setGames: Dispatch<Game[]>}) {
     const router = useRouter();

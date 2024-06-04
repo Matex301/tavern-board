@@ -4,7 +4,7 @@ import { Quest } from "@/app/types/Quest";
 import { PagedCollection } from "@/app/types/collection"
 import { getJWT, getUserId } from "./login-client";
 
-export async function fetchQuests(signal: AbortSignal, page: number, start: Date|undefined = undefined, game: string|undefined = undefined) {
+export async function fetchQuests(signal: AbortSignal, page: number, start: Date|undefined = undefined, game: string|undefined = undefined, tavern: string|undefined = undefined) {
     let url;
     url = new URL('http://localhost:8000/api/quests');
 
@@ -12,6 +12,10 @@ export async function fetchQuests(signal: AbortSignal, page: number, start: Date
 
     if(game) {
         url.searchParams.set('game', game);
+    }
+
+    if(tavern) {
+        url.searchParams.set('tavern', tavern);
     }
 
     if(start) {
@@ -47,7 +51,7 @@ export async function fetchQuest(signal: AbortSignal, id: string) {
     }
 }
 
-export async function fetchQuestJoined(signal: AbortSignal, page: number, start: Date|undefined = undefined, game: string|undefined = undefined) {
+export async function fetchQuestJoined(signal: AbortSignal, page: number, start: Date|undefined = undefined, game: string|undefined = undefined, tavern: string|undefined = undefined) {
     let id = getUserId();
     let jwt = getJWT();
     if(!id || !jwt)
@@ -58,6 +62,10 @@ export async function fetchQuestJoined(signal: AbortSignal, page: number, start:
 
     if(game) {
         url.searchParams.set('game', game);
+    }
+
+    if(tavern) {
+        url.searchParams.set('tavern', tavern);
     }
 
     if(start) {
@@ -79,6 +87,46 @@ export async function fetchQuestJoined(signal: AbortSignal, page: number, start:
             return null;
 
         console.error("fetchQuestJoined", error);
+        return null;
+    }
+}
+
+export async function fetchQuestCreated(signal: AbortSignal, page: number, start: Date|undefined = undefined, game: string|undefined = undefined, tavern: string|undefined = undefined) {
+    let id = getUserId();
+    let jwt = getJWT();
+    if(!id || !jwt)
+        return null;
+
+    let url = new URL(`http://localhost:8000/api/users/${id}/created`);
+    url.searchParams.set('page', page.toString());
+
+    if(game) {
+        url.searchParams.set('game', game);
+    }
+
+    if(tavern) {
+        url.searchParams.set('tavern', tavern);
+    }
+
+    if(start) {
+        url.searchParams.set('startAt[before]', start.toISOString());
+    }
+
+    try {
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${jwt}`
+            },
+            signal: signal
+        });
+        const data = await response.json();
+        return data as PagedCollection<Quest>;
+    } catch (error) {
+        if(signal.aborted)
+            return null;
+
+        console.error("fetchQuestCreated", error);
         return null;
     }
 }

@@ -1,10 +1,5 @@
 import { Item } from "./item";
-
-export interface Address {
-  street: string,
-  city: string,
-  country: string
-}
+import { Address } from "./Tavern";
 
 export class TavernSelect implements Item {
   public "@id": string;

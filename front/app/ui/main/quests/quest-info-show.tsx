@@ -1,6 +1,8 @@
 import Image from 'next/image';
 import clsx from 'clsx';
+import IconRow, { IconRowSkeleton } from '../icon-row';
 import { Quest } from '@/app/types/Quest';
+import { useRouter } from 'next/navigation';
 import { Dispatch, MouseEventHandler, useState } from 'react';
 import { joinQuest, leaveQuest } from '@/app/api-actions/quests';
 import {
@@ -16,15 +18,21 @@ import {
 import dateFormatted from './date-formatted';
 import Spinner from '../spinner';
 import Button from '../icon-button';
+import { getUserId } from '@/app/api-actions/login-client';
 
 
 export default function QuestInfo({quest, setQuest}: {quest: Quest, setQuest: Dispatch<Quest>}) {
     const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
     const controller = new AbortController();
     const signal = controller.signal;
 
     async function onClickJoin() {
+        if(!getUserId()) {
+            router.push('/login');
+        }
+
         setLoading(true);
         const updatedQuest = await joinQuest(signal, quest.id);
         if(updatedQuest) {
@@ -80,18 +88,6 @@ export default function QuestInfo({quest, setQuest}: {quest: Quest, setQuest: Di
     );
 }
 
-function IconRow({ LinkIcon, content, styleName}: { LinkIcon: typeof PuzzlePieceIcon, content: string | null | undefined, styleName: string}) {
-    return (
-        <div className={clsx(
-        "flex items-center justify-start gap-2 m-0 md:text-lg",
-        styleName
-        )}>
-        <LinkIcon className="size-6" />
-        <p className="flex items-center justify-start">{content}</p>
-        </div>
-    );
-};
-
 function playerSlicer(current: any, max: any) {
     let ret = current;
     if(max)
@@ -132,15 +128,3 @@ export function QuestInfoShowSkeleton() {
         </div>
     );
 }
-
-const IconRowSkeleton = function({ LinkIcon, styleName}: { LinkIcon: typeof PuzzlePieceIcon, styleName: string}) {
-    return (
-      <div className={clsx(
-        "flex items-center justify-start gap-2 m-0 md:text-lg pr-3 md:pr-0",
-        styleName
-      )}>
-        <LinkIcon className="size-6" />
-        <p className="flex items-center justify-start h-6 w-36 md:w-52 animate-pulse rounded-md bg-slate-200"></p>
-      </div>
-    );
-  };
